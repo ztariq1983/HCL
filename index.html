@@ -121,7 +121,6 @@
     </div>
     <div class="flex gap-1">
       <button onclick="setUnits('mmol')" id="btn-mmol" class="unit-pill unit-on">mmol/L</button>
-      <button onclick="setUnits('mgdl')" id="btn-mgdl" class="unit-pill unit-off">mg/dL</button>
     </div>
   </div>
 </div>
@@ -299,7 +298,7 @@
             <label class="inp-label">Fasting glucose trend (overnight)</label>
             <select id="sel-fasting-trend" class="inp" onchange="save()">
               <option value="">— Select —</option>
-              <option value="stable">Stable (within ±1 mmol/L / ±18 mg/dL)</option>
+              <option value="stable">Stable (within ±1 mmol/L)</option>
               <option value="rising">Rising ↑</option>
               <option value="falling">Falling ↓</option>
               <option value="variable">Variable / inconsistent</option>
@@ -310,7 +309,7 @@
             <select id="sel-postmeal" class="inp" onchange="save()">
               <option value="">— Select —</option>
               <option value="returns">Returns to pre-meal level ✓</option>
-              <option value="high">Remains elevated (&gt;2.8 mmol/L / 50 mg/dL above)</option>
+              <option value="high">Remains elevated (&gt;2.8 mmol/L above)</option>
               <option value="low">Drops below pre-meal level</option>
               <option value="variable">Variable depending on meal</option>
             </select>
@@ -384,7 +383,7 @@
     <!-- ICR Assessment -->
     <div class="card">
       <div class="section-label">🧪 ICR Accuracy Assessment</div>
-      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Compare pre-meal vs 4-hour post-meal glucose to assess ICR. At 4 hrs glucose should be within ±2.8 mmol/L (±50 mg/dL) of pre-meal level.</p>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Compare pre-meal vs 4-hour post-meal glucose to assess ICR. At 4 hrs glucose should be within ±2.8 mmol/L of pre-meal level.</p>
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
           <label class="inp-label" id="lbl-icr-pre">Pre-meal glucose</label>
@@ -504,9 +503,9 @@ const UC = {
     targetPh: 'e.g. 100',
     isfPh: 'e.g. 45',
     bgPh: 'e.g. 170',
-    tirLabel: '(70–180 mg/dL)',
-    siteThreshold: '270 mg/dL',
-    icr_threshold: 50, // mg/dL
+    tirLabel: '(70–180)',
+    siteThreshold: '270',
+    icr_threshold: 50,
   },
 };
 
@@ -514,11 +513,11 @@ const UC = {
 const DEVICE_REFS = {
   '780g': {
     algorithm:    'SmartGuard (pump-integrated)',
-    targets:      '100, 110, or 120 mg/dL (5.5, 6.1, 6.7 mmol/L) — one target for 24 hrs',
-    bolus_auto:   'Auto corrections every 5 min if glucose >120 mg/dL (6.7 mmol/L). Can be turned on/off.',
+    targets:      '5.5, 6.1, or 6.7 mmol/L — one target for 24 hrs',
+    bolus_auto:   'Auto corrections every 5 min if glucose >6.7 mmol/L. Can be turned on/off.',
     ait:          'Adjustable 2–4 hrs. 2 hrs = most aggressive (mainly affects auto correction bolus doses)',
-    optimal:      'Target 100 mg/dL (5.5) + AIT 2 hrs for optimal performance (if TBR <4%)',
-    exercise:     'Temp Target → raises target to 150 mg/dL (8.3), disables auto corrections. Use 1–2 hrs before exercise.',
+    optimal:      'Target 5.5 mmol/L + AIT 2 hrs for optimal performance (if TBR <4%)',
+    exercise:     'Temp Target → raises target to 8.3 mmol/L, disables auto corrections. Use 1–2 hrs before exercise.',
     editable:     'ICR, AIT, Target glucose (basal rates and ISF NOT adjustable in AID mode)',
     cgm:          'Guardian 4 (7 days), Simplera Sync (7 days)',
     revert:       'Safe Basal (limited mode): algorithm-set basal, no CGM adjustments, no auto corrections. Reverts to full manual if "time to exit" expires without BG entry.',
@@ -526,11 +525,11 @@ const DEVICE_REFS = {
   },
   'omnipod5': {
     algorithm:    'SmartAdjust (pod-integrated)',
-    targets:      '110, 120, 130, 140, or 150 mg/dL (6.1–8.3 mmol/L) — up to 8 different target settings per 24 hrs',
+    targets:      '6.1, 6.7, 7.2, 7.8, or 8.3 mmol/L — up to 8 different target settings per 24 hrs',
     bolus_auto:   'No auto correction boluses. Algorithm increases basal up to 400% of Adaptive Basal to correct highs.',
     ait:          'Adjustable',
-    optimal:      'Start at 110 mg/dL if TBR acceptable. Adaptive Basal updates at each pod change.',
-    exercise:     'Activity Feature → target 150 mg/dL, doses reduced ~50%. Use 1–2 hrs before exercise.',
+    optimal:      'Start at 6.1 mmol/L if TBR acceptable. Adaptive Basal updates at each pod change.',
+    exercise:     'Activity Feature → target 8.3 mmol/L, doses reduced ~50%. Use 1–2 hrs before exercise.',
     editable:     'ICR, ISF, AIT, Target glucose (basal rates NOT adjustable in AID mode)',
     cgm:          'Dexcom G6/G7 (10 days), FreeStyle Libre 2 Plus (15 days)',
     revert:       'Automated Limited: pod-set basal, no CGM-dependent adjustments. Activates if no CGM data ≥20 min or Automated Delivery Restriction alarm.',
@@ -538,11 +537,11 @@ const DEVICE_REFS = {
   },
   'tslim': {
     algorithm:    'Control-IQ Technology (pump-integrated)',
-    targets:      'Fixed range 112.5–160 mg/dL (6.25–8.9 mmol/L). Sleep Activity: 112.5–120. Exercise Activity: 140–160.',
-    bolus_auto:   'Auto corrections max once/hr if predicted glucose >180 mg/dL (10 mmol/L) in 30 min.',
+    targets:      'Fixed range 6.25–8.9 mmol/L. Sleep Activity: 6.25–6.7 mmol/L. Exercise Activity: 7.8–8.9 mmol/L.',
+    bolus_auto:   'Auto corrections max once/hr if predicted glucose >10 mmol/L in 30 min.',
     ait:          'FIXED at 5 hours — not adjustable',
     optimal:      'Programme sleep schedule so Sleep Activity activates automatically overnight. Use additional profiles for changing insulin needs.',
-    exercise:     'Exercise Activity → target 140–160 mg/dL (auto corrections can still occur). Sleep Activity → 112.5–120 mg/dL, disables auto corrections.',
+    exercise:     'Exercise Activity → target 7.8–8.9 mmol/L (auto corrections can still occur). Sleep Activity → 6.25–6.7 mmol/L, disables auto corrections.',
     editable:     'Basal rates, ICR, ISF/correction factor (AIT NOT adjustable)',
     cgm:          'Dexcom G6/G7 (10 days); FreeStyle Libre 2 Plus (15 days, t:slim only)',
     revert:       'No limited mode — reverts directly to programmed basal rates (manual mode) if no CGM data ≥20 min. Control-IQ auto-restores when CGM returns.',
@@ -550,11 +549,11 @@ const DEVICE_REFS = {
   },
   'twiist': {
     algorithm:    'Tidepool Loop (app-based, iOS only)',
-    targets:      '"Correction Range" 87–180 mg/dL (4.8–10 mmol/L) — algorithm targets middle. Set multiple ranges throughout 24 hrs.',
+    targets:      '"Correction Range" 4.8–10.0 mmol/L — algorithm targets middle. Set multiple ranges throughout 24 hrs.',
     bolus_auto:   'No auto correction boluses. Algorithm increases basal up to the maximum programmed basal rate.',
     ait:          'FIXED at 6 hours — not adjustable',
-    optimal:      'Consider a ~20 mg/dL range (e.g. 90–110 mg/dL). Max Basal Rate should be set at 3–4× highest basal.',
-    exercise:     'Workout Preset → higher correction range (87–250 mg/dL) to reduce insulin. Activate 1–2 hrs before exercise.',
+    optimal:      'Consider a narrow correction range (e.g. 5.0–6.1 mmol/L). Max Basal Rate should be set at 3–4× highest basal.',
+    exercise:     'Workout Preset → higher correction range (4.8–13.9 mmol/L) to reduce insulin. Activate 1–2 hrs before exercise.',
     editable:     'Basal rates, ICR, ISF, Correction Range, Maximum Basal Rate (AIT NOT adjustable)',
     cgm:          'FreeStyle Libre 3+ (15 days), Eversense 365',
     revert:       'No limited mode — reverts to programmed basal rates within 30 min if no CGM data >15 min. Loop auto-resumes when CGM returns.',
@@ -562,7 +561,7 @@ const DEVICE_REFS = {
   },
   'ilet': {
     algorithm:    'Beta Bionics (fully automated — no pump settings)',
-    targets:      '"Usual" 120 mg/dL (6.7), "Lower" 110 mg/dL (6.1), "Higher" 130 mg/dL (7.2). Up to 2 target settings per 24 hrs.',
+    targets:      '"Usual" 6.7 mmol/L, "Lower" 6.1 mmol/L, "Higher" 7.2 mmol/L. Up to 2 target settings per 24 hrs.',
     bolus_auto:   'ALL meal and correction boluses fully automated. Auto corrections every 5 min as needed. No manual bolus possible.',
     ait:          'N/A — fully automated, no pump settings',
     optimal:      'Initialise with patient weight only. Algorithm self-adapts — allow 5–7 days before changing settings.',
@@ -574,7 +573,7 @@ const DEVICE_REFS = {
   },
   'camaps': {
     algorithm:    'CamAPS FX (app-based, Android & iOS)',
-    targets:      'Customisable 4.4–11.1 mmol/L (80–200 mg/dL), default 5.8 mmol/L. Adjustable overnight. No basal rates needed.',
+    targets:      'Customisable 4.4–11.1 mmol/L, default 5.8 mmol/L. Adjustable overnight. No basal rates needed.',
     bolus_auto:   'Incorporated into continuous delivery — adjusts insulin every 8–12 min based on CGM trend.',
     ait:          'Adjustable',
     optimal:      'Requires only TDD + body weight for setup. Update weight every 6 months. Allow algorithm to self-adjust before using Boost/Ease Off.',
@@ -672,7 +671,7 @@ function setUnits(u, doSave=true) {
   document.getElementById('btn-mmol').className = 'unit-pill ' + (u==='mmol' ? 'unit-on' : 'unit-off');
   document.getElementById('btn-mgdl').className = 'unit-pill ' + (u==='mgdl' ? 'unit-on' : 'unit-off');
   const cfg = UC[u];
-  const unitStr = u === 'mmol' ? 'mmol/L' : 'mg/dL';
+  const unitStr = 'mmol/L';
   document.getElementById('lbl-isf').textContent       = `ISF / Correction Factor (${unitStr} per unit)`;
   document.getElementById('hint-isf').textContent      = `How much 1 unit lowers blood glucose (${unitStr} per unit)`;
   document.getElementById('inp-isf').placeholder       = cfg.isfPh;
@@ -762,7 +761,7 @@ function updateCalcTab() {
   const cfg = UC[appUnits];
   const icrEst  = Math.round(500 / tdd);
   const isfEst  = appUnits === 'mmol' ? (100/tdd).toFixed(1) : Math.round(1800/tdd);
-  const unit    = appUnits === 'mmol' ? 'mmol/L' : 'mg/dL';
+  const unit    = 'mmol/L';
   const basalLo = (tdd * 0.40).toFixed(1);
   const basalHi = (tdd * 0.50).toFixed(1);
   const currentICR = parseFloat(v('inp-icr'));
@@ -891,7 +890,7 @@ function checkICR() {
   res.style.display = '';
   const diff  = post - pre;
   const thresh = UC[appUnits].icr_threshold;
-  const unit   = appUnits === 'mmol' ? 'mmol/L' : 'mg/dL';
+  const unit   = 'mmol/L';
   const curICR = parseFloat(v('inp-icr'));
   let msg = '', col = '#059669', bg = '#ecfdf5';
 
@@ -989,7 +988,7 @@ function generateRecommendations() {
 
   if (siteIssues) {
     recs.push({ level:'urgent', title:'🔧 Possible Infusion Site / Cannula Issue',
-      body:`Unexplained persistent hyperglycaemia unresponsive to automated corrections suggests site failure. Action: change infusion set immediately if glucose >${appUnits==='mmol'?'15 mmol/L':'270 mg/dL'} for >2 hours. Check for kinking, lipohypertrophy, or occlusion. Test ketones.` });
+      body:`Unexplained persistent hyperglycaemia unresponsive to automated corrections suggests site failure. Action: change infusion set immediately if glucose >15 mmol/L for >2 hours. Check for kinking, lipohypertrophy, or occlusion. Test ketones.` });
   }
 
   if (fakeCarbs) {
@@ -1039,7 +1038,7 @@ function generateRecommendations() {
     if (pump === '780g') {
       if (hyperFasting || hyperOvernight || fastingTrend === 'rising') {
         recs.push({ level:'info', title:'📈 780G — Overnight/Fasting Hyperglycaemia',
-          body:`1. Ensure SmartGuard is active overnight — are BG prompts being missed? Set target to 100 mg/dL (5.5 mmol/L) and AIT to 2 hours for most aggressive overnight delivery. 2. Review evening/bedtime bolus: was dinner bolused adequately? 3. Consider impact of bedtime snack (bolus for it if >15g carbs). 4. Check cannula change frequency.` });
+          body:`1. Ensure SmartGuard is active overnight — are BG prompts being missed? Set target to 5.5 mmol/L and AIT to 2 hours for most aggressive overnight delivery. 2. Review evening/bedtime bolus: was dinner bolused adequately? 3. Consider impact of bedtime snack (bolus for it if >15g carbs). 4. Check cannula change frequency.` });
       }
       if (postMealHyper || postMealPtn === 'high') {
         recs.push({ level:'info', title:'📈 780G — Post-Meal Hyperglycaemia',
@@ -1055,7 +1054,7 @@ function generateRecommendations() {
     if (pump === 'omnipod5') {
       if (hyperOvernight || hyperFasting) {
         recs.push({ level:'info', title:'📈 Omnipod 5 — Overnight/Fasting Hyperglycaemia',
-          body:`1. Reduce target glucose to a lower available setting (minimum 110 mg/dL / 6.1 mmol/L). 2. Note: Omnipod 5 has no auto correction boluses — overnight control relies on increased Adaptive Basal. If basal delivery is already near maximum (400% adaptive), ICR/ISF review is needed. 3. Check bolus adequacy for evening meal.` });
+          body:`1. Reduce target glucose to a lower available setting (minimum 6.1 mmol/L). 2. Note: Omnipod 5 has no auto correction boluses — overnight control relies on increased Adaptive Basal. If basal delivery is already near maximum (400% adaptive), ICR/ISF review is needed. 3. Check bolus adequacy for evening meal.` });
       }
       if (postMealHyper || postMealPtn === 'high') {
         recs.push({ level:'info', title:'📈 Omnipod 5 — Post-Meal Hyperglycaemia',
@@ -1063,7 +1062,7 @@ function generateRecommendations() {
       }
       if (postMealPtn === 'high' || anyHyper) {
         recs.push({ level:'info', title:'📈 Omnipod 5 — ISF Review',
-          body:`Consider strengthening ISF (reduce the value in mg/dL per unit) if baseline glucose remains elevated despite adequate basal delivery. ISF is used for any manual correction boluses and affects algorithm correction calculations.` });
+          body:`Consider strengthening ISF (reduce the mmol/L per unit value) if baseline glucose remains elevated despite adequate basal delivery. ISF is used for any manual correction boluses and affects algorithm correction calculations.` });
       }
     }
 
@@ -1071,18 +1070,18 @@ function generateRecommendations() {
     if (pump === 'tslim') {
       if (hyperOvernight || hyperFasting || fastingTrend === 'rising') {
         recs.push({ level:'info', title:'📈 t:slim — Overnight/Fasting Hyperglycaemia',
-          body:`1. Activate Sleep Activity overnight (narrows target to 112.5–120 mg/dL, increases basal delivery). Programme a sleep schedule for automatic daily activation. 2. If already using Sleep Activity: consider strengthening ISF or increasing basal rate(s) in the 1–2 hours preceding the hyperglycaemia. 3. Review dinner bolus adequacy.` });
+          body:`1. Activate Sleep Activity overnight (narrows target to 6.25–6.7 mmol/L, increases basal delivery). Programme a sleep schedule for automatic daily activation. 2. If already using Sleep Activity: consider strengthening ISF or increasing basal rate(s) in the 1–2 hours preceding the hyperglycaemia. 3. Review dinner bolus adequacy.` });
       }
       if (postMealHyper || postMealPtn === 'high') {
         recs.push({ level:'info', title:'📈 t:slim — Post-Meal Hyperglycaemia',
-          body:`t:slim auto correction boluses activate only when glucose is predicted to exceed 10 mmol/L (180 mg/dL) in 30 minutes (max once/hr). Meal bolus accuracy is critical. Actions: strengthen ICR and/or ISF. Ensure Sleep Activity is not active during daytime (it disables auto corrections). Use multiple profiles for variable insulin needs.` });
+          body:`t:slim auto correction boluses activate only when glucose is predicted to exceed 10 mmol/L in 30 minutes (max once/hr). Meal bolus accuracy is critical. Actions: strengthen ICR and/or ISF. Ensure Sleep Activity is not active during daytime (it disables auto corrections). Use multiple profiles for variable insulin needs.` });
       }
     }
 
     // — twiist —
     if (pump === 'twiist') {
       recs.push({ level:'info', title:'📈 twiist — Hyperglycaemia Management',
-        body:`1. Lower the Correction Range to a more aggressive setting (e.g. 90–110 mg/dL width of 20 mg/dL). 2. Use Pre-Meal Preset (67–130 mg/dL, up to 1 hr before meals) to increase basal pre-meal and reduce post-prandial peaks. 3. Check Maximum Basal Rate is set at 3–4× highest programmed basal rate to allow adequate automation. 4. Indicate carb absorption time (🍭🌮🍕 emoji) for better post-meal coverage.` });
+        body:`1. Lower the Correction Range to a more aggressive setting (e.g. 5.0–6.1 mmol/L). 2. Use Pre-Meal Preset (3.7–7.2 mmol/L, up to 1 hr before meals) to increase basal pre-meal and reduce post-prandial peaks. 3. Check Maximum Basal Rate is set at 3–4× highest programmed basal rate to allow adequate automation. 4. Indicate carb absorption time (🍭🌮🍕 emoji) for better post-meal coverage.` });
     }
 
     // — iLet —
@@ -1113,7 +1112,7 @@ function generateRecommendations() {
     // — 780G —
     if (pump === '780g') {
       recs.push({ level:'info', title:'📉 780G — Hypoglycaemia Management',
-        body:`Options (start with least invasive): 1. Increase SmartGuard target (110 or 120 mg/dL). 2. Use Temp Target 1–2 hrs before known hypo triggers (raises target to 150 mg/dL, disables auto corrections). 3. If post-meal hypos: weaken ICR by 1–2g increments. 4. If exercise-related: use Temp Target 1–2 hrs before, reduce meal bolus by 30% for meals within 90 min of exercise, and increase AIT. 5. Confirm no fake carb boluses.` });
+        body:`Options (start with least invasive): 1. Increase SmartGuard target (6.1 or 6.7 mmol/L). 2. Use Temp Target 1–2 hrs before known hypo triggers (raises target to 8.3 mmol/L, disables auto corrections). 3. If post-meal hypos: weaken ICR by 1–2g increments. 4. If exercise-related: use Temp Target 1–2 hrs before, reduce meal bolus by 30% for meals within 90 min of exercise, and increase AIT. 5. Confirm no fake carb boluses.` });
     }
 
     // — Omnipod 5 —
@@ -1131,13 +1130,13 @@ function generateRecommendations() {
     // — twiist —
     if (pump === 'twiist') {
       recs.push({ level:'info', title:'📉 twiist — Hypoglycaemia Management',
-        body:`Options: 1. Widen/raise Correction Range (less aggressive targeting). 2. Use Workout Preset 1–2 hrs before exercise (higher correction range 87–250 mg/dL). 3. If post-meal hypos: weaken ICR. 4. Review glucose safety limit (can suspend delivery if glucose predicted to drop below 67–110 mg/dL in 3 hrs). 5. Check maximum basal rate is not excessively high.` });
+        body:`Options: 1. Widen/raise Correction Range (less aggressive targeting). 2. Use Workout Preset 1–2 hrs before exercise (higher correction range 4.8–13.9 mmol/L). 3. If post-meal hypos: weaken ICR. 4. Review glucose safety limit (can suspend delivery if glucose predicted to drop below 3.7–6.1 mmol/L in 3 hrs). 5. Check maximum basal rate is not excessively high.` });
     }
 
     // — iLet —
     if (pump === 'ilet') {
       recs.push({ level:'info', title:'📉 iLet — Hypoglycaemia Management',
-        body:`Options: 1. Switch CGM target to "Higher" (7.2 mmol/L / 130 mg/dL). Allow 5–7 days adaptation. 2. For exercise: avoid large pre-exercise snacks. If large snack needed, pause iLet before eating (max 1 hr pause). 3. Ensure patient carries a BG meter at all times for BG-run mode if CGM fails. 4. First-week protocol: space meals ≥4 hrs apart to aid algorithm learning.` });
+        body:`Options: 1. Switch CGM target to "Higher" (7.2 mmol/L). Allow 5–7 days adaptation. 2. For exercise: avoid large pre-exercise snacks. If large snack needed, pause iLet before eating (max 1 hr pause). 3. Ensure patient carries a BG meter at all times for BG-run mode if CGM fails. 4. First-week protocol: space meals ≥4 hrs apart to aid algorithm learning.` });
     }
 
     // — CamAPS —
@@ -1153,8 +1152,8 @@ function generateRecommendations() {
     const exerciseTips = {
       '780g':     `Temp Target (raises to 8.3 mmol/L, disables auto corrections): activate 1–2 hrs before, consider leaving on several hrs post-exercise. Reduce meal bolus by ~30% for meals within 90 min of exercise. Increase AIT for post-exercise period if delayed hypo concern. Avoid large carb snacks before exercise.`,
       'omnipod5': `Activity Feature (target 8.3 mmol/L, ~50% dose reduction): activate 1–2 hrs before, leave on post-exercise if delayed hypo concern. Reduce meal bolus 1–3 hrs before activity. Pod and Dexcom should be in line-of-sight during exercise.`,
-      'tslim':    `Exercise Activity (target 140–160 mg/dL): activate 1–2 hrs before. Note auto corrections can still occur. Leave on post-exercise. Reduce meal boluses 1–3 hrs before. Multiple profiles can be used for high-intensity vs. low-intensity activity days.`,
-      'twiist':   `Workout Preset (correction range 87–250 mg/dL, reduces basal): activate 1–2 hrs before exercise. Adjust sleep correction range if delayed nocturnal hypo is a pattern. Reduce meal bolus 1–3 hrs before. Carb absorption time emoji useful for pre-exercise meal.`,
+      'tslim':    `Exercise Activity (target 7.8–8.9 mmol/L): activate 1–2 hrs before. Note auto corrections can still occur. Leave on post-exercise. Reduce meal boluses 1–3 hrs before. Multiple profiles can be used for high-intensity vs. low-intensity activity days.`,
+      'twiist':   `Workout Preset (correction range 4.8–13.9 mmol/L, reduces basal): activate 1–2 hrs before exercise. Adjust sleep correction range if delayed nocturnal hypo is a pattern. Reduce meal bolus 1–3 hrs before. Carb absorption time emoji useful for pre-exercise meal.`,
       'ilet':     `Personalise per exercise type and duration. Avoid large pre-exercise snacks (triggers insulin spike). If large snack required, pause iLet before eating (max 1 hr at a time). Post-exercise: allow algorithm to adapt. Always carry BG meter for BG-run mode.`,
       'camaps':   `Ease Off (raises target +2.5 mmol/L): activate BEFORE exercise — ineffective once pump has already suspended. For prolonged activity, raise app target glucose setting. Boost should be avoided around exercise. Update weight if activity level changes significantly.`,
     };
