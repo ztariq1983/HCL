@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>HCL Decision Support</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Base ─────────────────────────────────────────────── */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'DM Sans', sans-serif; background: #f0f4f8; }
+
+    /* ── Tab bar ──────────────────────────────────────────── */
+    .tab-btn { flex: 1; padding: 10px 4px 8px; font-size: 11px; font-weight: 600;
+      color: #94a3b8; border-bottom: 3px solid transparent;
+      transition: color .2s, border-color .2s; display: flex; flex-direction: column;
+      align-items: center; gap: 2px; cursor: pointer; background: none; border-top: none;
+      border-left: none; border-right: none; }
+    .tab-btn.active { color: #0369a1; border-bottom-color: #0369a1; }
+
+    /* ── Cards ────────────────────────────────────────────── */
+    .card { background: #fff; border-radius: 14px; padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07); margin-bottom: 14px; }
+    .section-label { font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
+
+    /* ── Inputs ───────────────────────────────────────────── */
+    .inp { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      padding: 10px 12px; font-size: 16px; font-family: 'DM Sans', sans-serif;
+      background: #f8fafc; color: #1e293b; transition: border-color .2s, box-shadow .2s; }
+    .inp:focus { outline: none; border-color: #0369a1; box-shadow: 0 0 0 3px rgba(3,105,161,.12); background: #fff; }
+    select.inp { appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;
+      padding-right: 34px; }
+    .inp-label { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px; display: block; }
+    .inp-hint  { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+    /* ── Pump buttons ─────────────────────────────────────── */
+    .pump-btn { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 8px;
+      text-align: center; cursor: pointer; transition: all .2s; background: #f8fafc;
+      width: 100%; }
+    .pump-btn:hover  { border-color: #bae6fd; background: #f0f9ff; }
+    .pump-btn.sel    { border-color: #0369a1; background: #eff6ff; }
+    .pump-btn .p-name { font-size: 12px; font-weight: 700; color: #1e293b; margin-top: 4px; line-height: 1.3; }
+    .pump-btn .p-mfg  { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+    /* ── Unit toggle ──────────────────────────────────────── */
+    .unit-pill { padding: 5px 14px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all .2s; border: none; }
+    .unit-on  { background: #0369a1; color: #fff; }
+    .unit-off { background: rgba(255,255,255,.2); color: rgba(255,255,255,.7); }
+
+    /* ── Recommendation cards ─────────────────────────────── */
+    .rec { border-left: 4px solid; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .rec-urgent { border-color: #dc2626; background: #fef2f2; }
+    .rec-warn   { border-color: #d97706; background: #fffbeb; }
+    .rec-info   { border-color: #0369a1; background: #eff6ff; }
+    .rec-good   { border-color: #059669; background: #ecfdf5; }
+    .rec-title  { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 5px; }
+    .rec-body   { font-size: 12px; color: #374151; line-height: 1.6; }
+
+    /* ── Calc result box ──────────────────────────────────── */
+    .calc-box { background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 10px;
+      padding: 12px 14px; margin-top: 10px; font-size: 13px; }
+
+    /* ── TIR bar ──────────────────────────────────────────── */
+    .tir-bar { height: 18px; border-radius: 6px; overflow: hidden; display: flex; }
+
+    /* ── Checkbox rows ────────────────────────────────────── */
+    .chk-row { display: flex; align-items: center; gap: 10px; padding: 6px 0;
+      border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+    .chk-row:last-child { border-bottom: none; }
+    .chk-row input[type=checkbox] { width: 18px; height: 18px; border-radius: 5px;
+      accent-color: #0369a1; cursor: pointer; flex-shrink: 0; }
+    .chk-row label { font-size: 13px; color: #374151; cursor: pointer; flex: 1; }
+
+    /* ── Device ref grid ──────────────────────────────────── */
+    .ref-item { background: #f8fafc; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+    .ref-key   { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #64748b; margin-bottom: 3px; }
+    .ref-val   { font-size: 12.5px; color: #1e293b; line-height: 1.5; }
+
+    /* ── Scrollable content ───────────────────────────────── */
+    #main-content { padding: 14px; padding-bottom: 80px; }
+
+    /* ── Sticky top stack ─────────────────────────────────── */
+    #disclaimer { position: sticky; top: 0; z-index: 30; }
+    #app-header  { position: sticky; top: 40px; z-index: 29; }
+    #tab-nav     { position: sticky; top: 112px; z-index: 28; }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    #footer { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; background: #fff; border-top: 1px solid #e2e8f0;
+      padding: 8px 16px; text-align: center; z-index: 40; }
+
+    /* ── Mono font for numbers ────────────────────────────── */
+    .mono { font-family: 'DM Mono', monospace; }
+  </style>
+</head>
+<body style="max-width:480px; margin:0 auto; min-height:100vh;">
+
+<!-- ════════════════════════════════════════════════════════
+     DISCLAIMER BANNER
+═════════════════════════════════════════════════════════ -->
+<div id="disclaimer" class="bg-amber-50 border-b-2 border-amber-200 px-4 py-2 text-center">
+  <p class="text-xs text-amber-800 font-semibold">
+    ⚠️ <strong>Clinical Decision-Support Only</strong> — Not a replacement for professional judgement. Verify all recommendations with qualified HCP before implementing.
+  </p>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     APP HEADER
+═════════════════════════════════════════════════════════ -->
+<div id="app-header" class="bg-sky-800 px-4 py-3">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-white text-lg font-bold tracking-tight leading-tight">HCL Decision Support</h1>
+      <p class="text-sky-300 text-xs mt-0.5">AID Insulin Pump · Clinical Tool</p>
+    </div>
+    <div class="flex gap-1">
+      <button onclick="setUnits('mmol')" id="btn-mmol" class="unit-pill unit-on">mmol/L</button>
+      <button onclick="setUnits('mgdl')" id="btn-mgdl" class="unit-pill unit-off">mg/dL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     TAB NAVIGATION
+═════════════════════════════════════════════════════════ -->
+<div id="tab-nav" class="bg-white border-b border-gray-200 flex">
+  <button class="tab-btn active" id="tab-setup"      onclick="showTab('setup')">      <span class="text-lg">⚙️</span>Setup</button>
+  <button class="tab-btn"        id="tab-patterns"   onclick="showTab('patterns')">   <span class="text-lg">📊</span>Patterns</button>
+  <button class="tab-btn"        id="tab-calculator" onclick="showTab('calculator')"> <span class="text-lg">🔢</span>Calc</button>
+  <button class="tab-btn"        id="tab-advice"     onclick="showTab('advice')">     <span class="text-lg">💡</span>Advice</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN CONTENT
+═════════════════════════════════════════════════════════ -->
+<div id="main-content">
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PANE 1 — SETUP
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="pane-setup">
+
+    <!-- Pump Selector -->
+    <div class="card">
+      <div class="section-label">🏥 AID System</div>
+      <div class="grid grid-cols-2 gap-2" id="pump-grid">
+        <button class="pump-btn sel" id="pump-780g"     onclick="selectPump('780g')">    <div class="text-2xl">💊</div><div class="p-name">MiniMed 780G</div><div class="p-mfg">Medtronic</div></button>
+        <button class="pump-btn"    id="pump-omnipod5"  onclick="selectPump('omnipod5')"><div class="text-2xl">🫘</div><div class="p-name">Omnipod 5</div><div class="p-mfg">Insulet</div></button>
+        <button class="pump-btn"    id="pump-tslim"     onclick="selectPump('tslim')">   <div class="text-2xl">📱</div><div class="p-name">t:slim X2 / Mobi</div><div class="p-mfg">Tandem</div></button>
+        <button class="pump-btn"    id="pump-twiist"    onclick="selectPump('twiist')">  <div class="text-2xl">🌀</div><div class="p-name">twiist AID</div><div class="p-mfg">Tidepool Loop</div></button>
+        <button class="pump-btn"    id="pump-ilet"      onclick="selectPump('ilet')">    <div class="text-2xl">🤖</div><div class="p-name">iLet Bionic Pancreas</div><div class="p-mfg">Beta Bionics</div></button>
+        <button class="pump-btn"    id="pump-camaps"    onclick="selectPump('camaps')">  <div class="text-2xl">📲</div><div class="p-name">CamAPS FX</div><div class="p-mfg">Dana-i / YpsoPump</div></button>
+      </div>
+    </div>
+
+    <!-- Current Settings -->
+    <div class="card">
+      <div class="section-label">📋 Current Pump Settings</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+
+        <div>
+          <label class="inp-label">Total Daily Dose — TDD (units/day)</label>
+          <input type="number" id="inp-tdd" class="inp" placeholder="e.g. 40" min="5" max="350" oninput="save();updateCalcTab()">
+        </div>
+
+        <div id="row-icr">
+          <label class="inp-label">Insulin:Carb Ratio — ICR (grams per unit)</label>
+          <input type="number" id="inp-icr" class="inp" placeholder="e.g. 12" min="1" max="120" oninput="save()">
+          <p class="inp-hint">e.g. "1:12" = 12 g carbs per 1 unit insulin</p>
+        </div>
+
+        <div id="row-isf">
+          <label class="inp-label" id="lbl-isf">ISF / Correction Factor</label>
+          <input type="number" id="inp-isf" class="inp" placeholder="e.g. 2.5" step="0.1" oninput="save();updateCalcTab()">
+          <p class="inp-hint" id="hint-isf">How much 1 unit lowers blood glucose (mmol/L per unit)</p>
+        </div>
+
+        <div id="row-target">
+          <label class="inp-label" id="lbl-target">Current Target Glucose (mmol/L)</label>
+          <input type="number" id="inp-target" class="inp" placeholder="e.g. 5.5" step="0.1" oninput="save()">
+        </div>
+
+        <div id="row-ait" class="hidden">
+          <label class="inp-label">Active Insulin Time — AIT (hours)</label>
+          <select id="inp-ait" class="inp" onchange="save()">
+            <option value="">Select AIT</option>
+            <option value="2">2 hrs — most aggressive</option>
+            <option value="2.5">2.5 hrs</option>
+            <option value="3">3 hrs</option>
+            <option value="3.5">3.5 hrs</option>
+            <option value="4">4 hrs</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="inp-label">Time in Automode (%)</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="number" id="inp-automode" class="inp" placeholder="e.g. 85" min="0" max="100" oninput="save()">
+            <span style="font-size:18px; font-weight:700; color:#64748b;">%</span>
+          </div>
+          <p class="inp-hint">Target: &gt;80%. Low automode significantly reduces AID benefit.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Time in Range -->
+    <div class="card">
+      <div class="section-label">📈 Time in Range — Last 14 Days (%)</div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label class="inp-label">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:5px;vertical-align:middle;"></span>
+            TIR — Time <em>in</em> Range&nbsp;&nbsp;<span id="tir-range-lbl" style="font-weight:400; color:#94a3b8;">(3.9–10.0 mmol/L)</span>
+            <span style="color:#059669; font-size:11px; margin-left:4px;">Target &gt;70%</span>
+          </label>
+          <input type="number" id="inp-tir" class="inp" placeholder="e.g. 72" min="0" max="100" oninput="save();drawTirBar()">
+        </div>
+        <div>
+          <label class="inp-label">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:5px;vertical-align:middle;"></span>
+            TBR — Time <em>below</em> Range
+            <span style="color:#dc2626; font-size:11px; margin-left:4px;">Target &lt;4%</span>
+          </label>
+          <input type="number" id="inp-tbr" class="inp" placeholder="e.g. 2" min="0" max="100" oninput="save();drawTirBar()">
+        </div>
+        <div>
+          <label class="inp-label">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:5px;vertical-align:middle;"></span>
+            TAR — Time <em>above</em> Range
+            <span style="color:#d97706; font-size:11px; margin-left:4px;">Target &lt;25%</span>
+          </label>
+          <input type="number" id="inp-tar" class="inp" placeholder="e.g. 22" min="0" max="100" oninput="save();drawTirBar()">
+        </div>
+      </div>
+
+      <!-- TIR Visual Bar -->
+      <div id="tir-visual" style="margin-top:14px; display:none;">
+        <div class="tir-bar" id="tir-bar"></div>
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b; margin-top:4px;">
+          <span id="tir-bar-tbr"></span>
+          <span id="tir-bar-tir"></span>
+          <span id="tir-bar-tar"></span>
+        </div>
+        <div id="tir-status" style="margin-top:8px; font-size:12px; font-weight:600; padding:8px 12px; border-radius:8px;"></div>
+      </div>
+    </div>
+
+  </div><!-- /pane-setup -->
+
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PANE 2 — PATTERNS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="pane-patterns" style="display:none;">
+
+    <!-- Hyperglycaemia -->
+    <div class="card">
+      <div class="section-label" style="color:#d97706;">📈 Hyperglycaemia Patterns</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Tick all periods where glucose is persistently elevated</p>
+      <div id="hyper-checks">
+        <div class="chk-row"><input type="checkbox" id="hyper-fasting"       onchange="save()"><label for="hyper-fasting">🌅 Fasting / pre-breakfast</label></div>
+        <div class="chk-row"><input type="checkbox" id="hyper-postbreakfast" onchange="save()"><label for="hyper-postbreakfast">🥐 Post-breakfast (1–3 hrs)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hyper-postlunch"     onchange="save()"><label for="hyper-postlunch">🥗 Post-lunch (1–3 hrs)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hyper-postdinner"    onchange="save()"><label for="hyper-postdinner">🍽️ Post-dinner (1–3 hrs)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hyper-overnight"     onchange="save()"><label for="hyper-overnight">🌙 Overnight (midnight–6am)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hyper-exercise"      onchange="save()"><label for="hyper-exercise">🏃 Post-exercise</label></div>
+      </div>
+    </div>
+
+    <!-- Hypoglycaemia -->
+    <div class="card">
+      <div class="section-label" style="color:#dc2626;">📉 Hypoglycaemia Patterns</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Tick all periods where hypoglycaemia occurs</p>
+      <div id="hypo-checks">
+        <div class="chk-row"><input type="checkbox" id="hypo-fasting"       onchange="save()"><label for="hypo-fasting">🌅 Fasting / pre-breakfast</label></div>
+        <div class="chk-row"><input type="checkbox" id="hypo-postbreakfast" onchange="save()"><label for="hypo-postbreakfast">🥐 Post-breakfast (1–3 hrs)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hypo-postlunch"     onchange="save()"><label for="hypo-postlunch">🥗 Post-lunch (1–3 hrs)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hypo-postdinner"    onchange="save()"><label for="hypo-postdinner">🍽️ Post-dinner (1–3 hrs)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hypo-overnight"     onchange="save()"><label for="hypo-overnight">🌙 Overnight (midnight–6am)</label></div>
+        <div class="chk-row"><input type="checkbox" id="hypo-exercise"      onchange="save()"><label for="hypo-exercise">🏃 During / after exercise</label></div>
+        <div class="chk-row"><input type="checkbox" id="hypo-rebound"       onchange="save()"><label for="hypo-rebound">🔄 Rebound after hypo treatment</label></div>
+      </div>
+    </div>
+
+    <!-- Behaviour Flags -->
+    <div class="card">
+      <div class="section-label">🔍 Behaviour &amp; Clinical Flags</div>
+      <div>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px;">
+          <div>
+            <label class="inp-label">Fasting glucose trend (overnight)</label>
+            <select id="sel-fasting-trend" class="inp" onchange="save()">
+              <option value="">— Select —</option>
+              <option value="stable">Stable (within ±1 mmol/L / ±18 mg/dL)</option>
+              <option value="rising">Rising ↑</option>
+              <option value="falling">Falling ↓</option>
+              <option value="variable">Variable / inconsistent</option>
+            </select>
+          </div>
+          <div>
+            <label class="inp-label">Post-meal glucose at 4 hours vs pre-meal</label>
+            <select id="sel-postmeal" class="inp" onchange="save()">
+              <option value="">— Select —</option>
+              <option value="returns">Returns to pre-meal level ✓</option>
+              <option value="high">Remains elevated (&gt;2.8 mmol/L / 50 mg/dL above)</option>
+              <option value="low">Drops below pre-meal level</option>
+              <option value="variable">Variable depending on meal</option>
+            </select>
+          </div>
+        </div>
+        <div class="chk-row"><input type="checkbox" id="chk-late-bolus"     onchange="save()"><label for="chk-late-bolus">⏰ Patient boluses late (at/after meal start)</label></div>
+        <div class="chk-row"><input type="checkbox" id="chk-missed-bolus"   onchange="save()"><label for="chk-missed-bolus">❌ Evidence of missed meal boluses</label></div>
+        <div class="chk-row"><input type="checkbox" id="chk-bolus-override" onchange="save()"><label for="chk-bolus-override">⚖️ Patient regularly overrides bolus calculator</label></div>
+        <div class="chk-row"><input type="checkbox" id="chk-fake-carbs"     onchange="save()"><label for="chk-fake-carbs">🚫 Suspected "fake carb" entries</label></div>
+        <div class="chk-row"><input type="checkbox" id="chk-exercise-issues" onchange="save()"><label for="chk-exercise-issues">🏃 Exercise-related glucose issues</label></div>
+        <div class="chk-row"><input type="checkbox" id="chk-site-issues"    onchange="save()"><label for="chk-site-issues">🔧 Unexplained persistent highs (possible cannula/site issue)</label></div>
+      </div>
+    </div>
+
+  </div><!-- /pane-patterns -->
+
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PANE 3 — CALCULATOR
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="pane-calculator" style="display:none;">
+
+    <!-- TDD-based estimates -->
+    <div class="card">
+      <div class="section-label">📐 TDD-Based Setting Estimates</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Based on TDD entered in Setup. Estimates only — verify clinically.</p>
+      <div id="tdd-estimates-box">
+        <div style="text-align:center; color:#94a3b8; font-size:13px; padding:16px 0;">Enter TDD in Setup to generate estimates</div>
+      </div>
+    </div>
+
+    <!-- Bolus Calculator -->
+    <div class="card">
+      <div class="section-label">💉 Bolus Calculator</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label class="inp-label" id="lbl-calc-bg">Current Blood Glucose (mmol/L)</label>
+          <input type="number" id="calc-bg" class="inp" placeholder="e.g. 9.5" step="0.1" oninput="calcBolus()">
+        </div>
+        <div>
+          <label class="inp-label">Carbohydrates (grams)</label>
+          <input type="number" id="calc-carbs" class="inp" placeholder="e.g. 45" min="0" max="500" oninput="calcBolus()">
+        </div>
+        <div>
+          <label class="inp-label" id="lbl-calc-target">Target Glucose (mmol/L)</label>
+          <input type="number" id="calc-target" class="inp" placeholder="e.g. 5.5" step="0.1" oninput="calcBolus()">
+          <p class="inp-hint">Pre-fill from Setup target</p>
+        </div>
+        <div>
+          <label class="inp-label">Insulin on Board — IOB (units)</label>
+          <input type="number" id="calc-iob" class="inp" placeholder="e.g. 0.5" step="0.1" min="0" oninput="calcBolus()">
+        </div>
+        <div id="bolus-result" style="display:none;" class="calc-box"></div>
+        <p style="font-size:11px; color:#94a3b8;">In AID mode the pump bolus calculator already accounts for IOB from automated delivery. Use this as a reference check only.</p>
+      </div>
+    </div>
+
+    <!-- Basal Proportion Check -->
+    <div class="card">
+      <div class="section-label">⏱️ Basal Proportion Check</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Basal insulin should represent 40–50% of TDD. Enter total 24-hr basal delivery.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <label class="inp-label">Total 24-hr Basal Delivery (units)</label>
+          <input type="number" id="calc-total-basal" class="inp" placeholder="e.g. 18" step="0.1" oninput="checkBasal()">
+        </div>
+        <div id="basal-result" style="display:none;" class="calc-box"></div>
+      </div>
+    </div>
+
+    <!-- ICR Assessment -->
+    <div class="card">
+      <div class="section-label">🧪 ICR Accuracy Assessment</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Compare pre-meal vs 4-hour post-meal glucose to assess ICR. At 4 hrs glucose should be within ±2.8 mmol/L (±50 mg/dL) of pre-meal level.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <label class="inp-label" id="lbl-icr-pre">Pre-meal glucose</label>
+          <input type="number" id="icr-premeal" class="inp" placeholder="e.g. 6.5" step="0.1" oninput="checkICR()">
+        </div>
+        <div>
+          <label class="inp-label" id="lbl-icr-post">4-hour post-meal glucose</label>
+          <input type="number" id="icr-postmeal" class="inp" placeholder="e.g. 7.1" step="0.1" oninput="checkICR()">
+        </div>
+        <div id="icr-result" style="display:none;" class="calc-box"></div>
+      </div>
+    </div>
+
+  </div><!-- /pane-calculator -->
+
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PANE 4 — ADVICE
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="pane-advice" style="display:none;">
+
+    <!-- Generated recommendations -->
+    <div class="card">
+      <div class="section-label">💡 Clinical Recommendations</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px;">Generated from your entered settings and patterns. All actions require HCP review before implementation.</p>
+      <div id="recommendations-list">
+        <div style="text-align:center; color:#94a3b8; font-size:13px; padding:20px 0;">Complete Setup and Patterns tabs to generate recommendations</div>
+      </div>
+    </div>
+
+    <!-- Universal reminders -->
+    <div class="card" style="background:#eff6ff; border:1.5px solid #bae6fd;">
+      <div class="section-label" style="color:#0369a1;">⭐ Universal AID Reminders</div>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:13px; color:#1e293b; line-height:1.6;">
+        <div style="display:flex; gap:8px;"><span>💉</span><span><strong>Pre-bolus 10–15 min before meals</strong> for optimal post-meal control</span></div>
+        <div style="display:flex; gap:8px;"><span>🍬</span><span>Treat mild hypos with <strong>5–10 g carbs</strong> (not 15 g) — AID already reducing insulin</span></div>
+        <div style="display:flex; gap:8px;"><span>🔧</span><span>Unexplained highs &gt;<span id="site-threshold">15 mmol/L</span> for &gt;2 hrs — <strong>change cannula &amp; check ketones</strong></span></div>
+        <div style="display:flex; gap:8px;"><span>🏃</span><span>Activate exercise/activity mode <strong>1–2 hrs before</strong> activity</span></div>
+        <div style="display:flex; gap:8px;"><span>🚫</span><span><strong>No "fake carbs"</strong> — increases hypo risk, disrupts algorithm learning</span></div>
+        <div style="display:flex; gap:8px;"><span>⚖️</span><span>Avoid overriding bolus calculator — it accounts for IOB from automated delivery</span></div>
+        <div style="display:flex; gap:8px;"><span>📆</span><span>Update patient <strong>weight every 6 months</strong> if using t:slim X2 or CamAPS FX</span></div>
+      </div>
+    </div>
+
+    <!-- Device Quick Reference -->
+    <div class="card">
+      <div class="section-label">📖 Device Quick Reference — <span id="dev-ref-name">MiniMed 780G</span></div>
+      <div id="device-ref-content">
+        <div style="text-align:center; color:#94a3b8; font-size:13px; padding:16px 0;">Select a pump in Setup</div>
+      </div>
+    </div>
+
+    <!-- Reset button -->
+    <div style="text-align:center; padding-bottom:10px;">
+      <button onclick="resetAll()" style="font-size:12px; color:#94a3b8; background:none; border:1px solid #e2e8f0; border-radius:8px; padding:8px 18px; cursor:pointer;">🗑️ Clear all saved data</button>
+    </div>
+
+  </div><!-- /pane-advice -->
+
+</div><!-- /main-content -->
+
+<!-- ════════════════════════════════════════════════════════
+     FOOTER
+═════════════════════════════════════════════════════════ -->
+<div id="footer">
+  <p style="font-size:11px; color:#94a3b8;">HCL Decision Support v1.0 · PANTHER Program &amp; DSN Forum UK guidelines · For HCP use</p>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     JAVASCRIPT
+═════════════════════════════════════════════════════════ -->
+<script>
+/*
+ * HCL Decision Support Tool
+ * Based on:
+ *   - PANTHER Program AID device fact sheets (v.10–11.2025)
+ *   - DSN Forum UK HCL Comparison Chart (v8.0, Dec 2025)
+ *   - DSN Forum UK HCL Crib Sheet (v5, Dec 2025)
+ *   - DSN Forum UK CGM Comparison Charts (v2, March 2026)
+ */
+
+// ─────────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────────
+
+const TABS  = ['setup','patterns','calculator','advice'];
+
+const PUMP_NAMES = {
+  '780g':     'MiniMed 780G',
+  'omnipod5': 'Omnipod 5',
+  'tslim':    't:slim X2 / Mobi',
+  'twiist':   'twiist AID (Tidepool Loop)',
+  'ilet':     'iLet Bionic Pancreas',
+  'camaps':   'CamAPS FX',
+};
+
+/** Pumps with user-adjustable AIT in AID mode */
+const PUMP_HAS_AIT = ['780g','omnipod5','camaps'];
+
+/** iLet has no conventional pump settings */
+const PUMP_FULLY_AUTO = ['ilet'];
+
+/** Unit config */
+const UC = {
+  mmol: {
+    isfRule: 100,    // 100/TDD
+    targetPh: 'e.g. 5.5',
+    isfPh: 'e.g. 2.5',
+    bgPh: 'e.g. 9.5',
+    tirLabel: '(3.9–10.0 mmol/L)',
+    siteThreshold: '15 mmol/L',
+    icr_threshold: 2.8,  // mmol/L acceptable post-meal variance
+  },
+  mgdl: {
+    isfRule: 1800,   // 1800/TDD
+    targetPh: 'e.g. 100',
+    isfPh: 'e.g. 45',
+    bgPh: 'e.g. 170',
+    tirLabel: '(70–180 mg/dL)',
+    siteThreshold: '270 mg/dL',
+    icr_threshold: 50, // mg/dL
+  },
+};
+
+/** Device reference data (sourced from PDFs) */
+const DEVICE_REFS = {
+  '780g': {
+    algorithm:    'SmartGuard (pump-integrated)',
+    targets:      '100, 110, or 120 mg/dL (5.5, 6.1, 6.7 mmol/L) — one target for 24 hrs',
+    bolus_auto:   'Auto corrections every 5 min if glucose >120 mg/dL (6.7 mmol/L). Can be turned on/off.',
+    ait:          'Adjustable 2–4 hrs. 2 hrs = most aggressive (mainly affects auto correction bolus doses)',
+    optimal:      'Target 100 mg/dL (5.5) + AIT 2 hrs for optimal performance (if TBR <4%)',
+    exercise:     'Temp Target → raises target to 150 mg/dL (8.3), disables auto corrections. Use 1–2 hrs before exercise.',
+    editable:     'ICR, AIT, Target glucose (basal rates and ISF NOT adjustable in AID mode)',
+    cgm:          'Guardian 4 (7 days), Simplera Sync (7 days)',
+    revert:       'Safe Basal (limited mode): algorithm-set basal, no CGM adjustments, no auto corrections. Reverts to full manual if "time to exit" expires without BG entry.',
+    special:      'Requires BG entry to stay in SmartGuard. Do not enter fake carbs. Pre-bolus 10–15 min before meals.',
+  },
+  'omnipod5': {
+    algorithm:    'SmartAdjust (pod-integrated)',
+    targets:      '110, 120, 130, 140, or 150 mg/dL (6.1–8.3 mmol/L) — up to 8 different target settings per 24 hrs',
+    bolus_auto:   'No auto correction boluses. Algorithm increases basal up to 400% of Adaptive Basal to correct highs.',
+    ait:          'Adjustable',
+    optimal:      'Start at 110 mg/dL if TBR acceptable. Adaptive Basal updates at each pod change.',
+    exercise:     'Activity Feature → target 150 mg/dL, doses reduced ~50%. Use 1–2 hrs before exercise.',
+    editable:     'ICR, ISF, AIT, Target glucose (basal rates NOT adjustable in AID mode)',
+    cgm:          'Dexcom G6/G7 (10 days), FreeStyle Libre 2 Plus (15 days)',
+    revert:       'Automated Limited: pod-set basal, no CGM-dependent adjustments. Activates if no CGM data ≥20 min or Automated Delivery Restriction alarm.',
+    special:      'Pod and Dexcom must be in line-of-sight. Avoid aerosolised sprays near pod. Tap "Use Sensor" when bolusing to include trend arrow.',
+  },
+  'tslim': {
+    algorithm:    'Control-IQ Technology (pump-integrated)',
+    targets:      'Fixed range 112.5–160 mg/dL (6.25–8.9 mmol/L). Sleep Activity: 112.5–120. Exercise Activity: 140–160.',
+    bolus_auto:   'Auto corrections max once/hr if predicted glucose >180 mg/dL (10 mmol/L) in 30 min.',
+    ait:          'FIXED at 5 hours — not adjustable',
+    optimal:      'Programme sleep schedule so Sleep Activity activates automatically overnight. Use additional profiles for changing insulin needs.',
+    exercise:     'Exercise Activity → target 140–160 mg/dL (auto corrections can still occur). Sleep Activity → 112.5–120 mg/dL, disables auto corrections.',
+    editable:     'Basal rates, ICR, ISF/correction factor (AIT NOT adjustable)',
+    cgm:          'Dexcom G6/G7 (10 days); FreeStyle Libre 2 Plus (15 days, t:slim only)',
+    revert:       'No limited mode — reverts directly to programmed basal rates (manual mode) if no CGM data ≥20 min. Control-IQ auto-restores when CGM returns.',
+    special:      't:slim X2: remote bolus from phone via t:slim mobile app. Mobi: requires Mobi iOS app for pump control. Multiple profiles supported.',
+  },
+  'twiist': {
+    algorithm:    'Tidepool Loop (app-based, iOS only)',
+    targets:      '"Correction Range" 87–180 mg/dL (4.8–10 mmol/L) — algorithm targets middle. Set multiple ranges throughout 24 hrs.',
+    bolus_auto:   'No auto correction boluses. Algorithm increases basal up to the maximum programmed basal rate.',
+    ait:          'FIXED at 6 hours — not adjustable',
+    optimal:      'Consider a ~20 mg/dL range (e.g. 90–110 mg/dL). Max Basal Rate should be set at 3–4× highest basal.',
+    exercise:     'Workout Preset → higher correction range (87–250 mg/dL) to reduce insulin. Activate 1–2 hrs before exercise.',
+    editable:     'Basal rates, ICR, ISF, Correction Range, Maximum Basal Rate (AIT NOT adjustable)',
+    cgm:          'FreeStyle Libre 3+ (15 days), Eversense 365',
+    revert:       'No limited mode — reverts to programmed basal rates within 30 min if no CGM data >15 min. Loop auto-resumes when CGM returns.',
+    special:      'iOS only (must have iPhone). Carb absorption emoji: 🍭 Fast (30 min), 🌮 Medium (3 hrs), 🍕 Slow (5 hrs). Pre-meal preset available.',
+  },
+  'ilet': {
+    algorithm:    'Beta Bionics (fully automated — no pump settings)',
+    targets:      '"Usual" 120 mg/dL (6.7), "Lower" 110 mg/dL (6.1), "Higher" 130 mg/dL (7.2). Up to 2 target settings per 24 hrs.',
+    bolus_auto:   'ALL meal and correction boluses fully automated. Auto corrections every 5 min as needed. No manual bolus possible.',
+    ait:          'N/A — fully automated, no pump settings',
+    optimal:      'Initialise with patient weight only. Algorithm self-adapts — allow 5–7 days before changing settings.',
+    exercise:     'Pause Insulin feature (max 1 hr at a time). Avoid large pre-exercise snacks; if needed, pause iLet before eating.',
+    editable:     'CGM Target only — no other pump settings. Hands-off approach is essential.',
+    cgm:          'Dexcom G6/G7 (10 days), FreeStyle Libre 3 Plus (15 days)',
+    revert:       'BG-run mode: continues full automation using manual BG entries for up to 72 hrs. After 72 hrs without CGM, iLet stops insulin. No true manual mode.',
+    special:      'Meal announcements required: meal type (B/L/D) + size (Usual/More/Less). First week: space meals ≥4 hrs apart. Always carry BG meter.',
+  },
+  'camaps': {
+    algorithm:    'CamAPS FX (app-based, Android & iOS)',
+    targets:      'Customisable 4.4–11.1 mmol/L (80–200 mg/dL), default 5.8 mmol/L. Adjustable overnight. No basal rates needed.',
+    bolus_auto:   'Incorporated into continuous delivery — adjusts insulin every 8–12 min based on CGM trend.',
+    ait:          'Adjustable',
+    optimal:      'Requires only TDD + body weight for setup. Update weight every 6 months. Allow algorithm to self-adjust before using Boost/Ease Off.',
+    exercise:     'Ease Off → raises target by 2.5 mmol/L. Activate BEFORE hypo occurs (ineffective once pump already suspended). Boost → increases basal by 35%.',
+    editable:     'ICR, Target Glucose (ISF NOT adjustable; no basal rates)',
+    cgm:          'Dexcom G6, FreeStyle Libre 3 Plus',
+    revert:       'App-based — if phone unavailable pump continues on last settings. Companion app available for remote monitoring.',
+    special:      'Boost for known high-glucose causes (illness, stress, menstrual cycle). Log hypo treatments in "add meal" to prevent rebound overcorrection.',
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+// STATE & PERSISTENCE
+// ─────────────────────────────────────────────────────────
+
+let appUnits = 'mmol';
+let appPump  = '780g';
+
+function save() {
+  const s = {
+    units: appUnits,
+    pump:  appPump,
+    tdd:   v('inp-tdd'),   icr: v('inp-icr'),  isf: v('inp-isf'),
+    target: v('inp-target'), ait: v('inp-ait'), automode: v('inp-automode'),
+    tir: v('inp-tir'), tbr: v('inp-tbr'), tar: v('inp-tar'),
+    // patterns
+    hf:  c('hyper-fasting'),  hpb: c('hyper-postbreakfast'), hpl: c('hyper-postlunch'),
+    hpd: c('hyper-postdinner'),  ho: c('hyper-overnight'),    hx: c('hyper-exercise'),
+    lyf: c('hypo-fasting'),  lyb: c('hypo-postbreakfast'),  lyl: c('hypo-postlunch'),
+    lyd: c('hypo-postdinner'), lyo: c('hypo-overnight'),    lyx: c('hypo-exercise'),   lyr: c('hypo-rebound'),
+    // flags
+    ft: sv('sel-fasting-trend'), pm: sv('sel-postmeal'),
+    lb: c('chk-late-bolus'), mb: c('chk-missed-bolus'), bo: c('chk-bolus-override'),
+    fc: c('chk-fake-carbs'), ex: c('chk-exercise-issues'), si: c('chk-site-issues'),
+  };
+  try { localStorage.setItem('hcl_dss', JSON.stringify(s)); } catch(e){}
+  generateRecommendations();
+}
+
+function v(id)  { const el = document.getElementById(id); return el ? el.value : ''; }
+function c(id)  { const el = document.getElementById(id); return el ? el.checked : false; }
+function sv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function loadAndRestore() {
+  let s;
+  try { s = JSON.parse(localStorage.getItem('hcl_dss') || '{}'); } catch(e){ s = {}; }
+  if (s.units) setUnits(s.units, false);
+  if (s.pump)  selectPump(s.pump, false);
+  const fields = ['tdd','icr','isf','target','ait','automode','tir','tbr','tar'];
+  fields.forEach(f => { const el = document.getElementById('inp-'+f); if(el && s[f] !== undefined) el.value = s[f]; });
+  // selects
+  if (s.ft) document.getElementById('sel-fasting-trend').value = s.ft;
+  if (s.pm) document.getElementById('sel-postmeal').value = s.pm;
+  // checkboxes
+  const cks = {
+    'hyper-fasting':s.hf,'hyper-postbreakfast':s.hpb,'hyper-postlunch':s.hpl,
+    'hyper-postdinner':s.hpd,'hyper-overnight':s.ho,'hyper-exercise':s.hx,
+    'hypo-fasting':s.lyf,'hypo-postbreakfast':s.lyb,'hypo-postlunch':s.lyl,
+    'hypo-postdinner':s.lyd,'hypo-overnight':s.lyo,'hypo-exercise':s.lyx,'hypo-rebound':s.lyr,
+    'chk-late-bolus':s.lb,'chk-missed-bolus':s.mb,'chk-bolus-override':s.bo,
+    'chk-fake-carbs':s.fc,'chk-exercise-issues':s.ex,'chk-site-issues':s.si,
+  };
+  Object.entries(cks).forEach(([id,val]) => { const el = document.getElementById(id); if(el && val !== undefined) el.checked = val; });
+  drawTirBar();
+  updateCalcTab();
+  generateRecommendations();
+}
+
+function resetAll() {
+  if (!confirm('Clear all saved data and start fresh?')) return;
+  localStorage.removeItem('hcl_dss');
+  location.reload();
+}
+
+// ─────────────────────────────────────────────────────────
+// TAB NAVIGATION
+// ─────────────────────────────────────────────────────────
+
+function showTab(tab) {
+  TABS.forEach(t => {
+    document.getElementById('pane-'+t).style.display  = t === tab ? '' : 'none';
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'advice')     generateRecommendations();
+  if (tab === 'calculator') updateCalcTab();
+  window.scrollTo(0,0);
+}
+
+// ─────────────────────────────────────────────────────────
+// UNITS
+// ─────────────────────────────────────────────────────────
+
+function setUnits(u, doSave=true) {
+  appUnits = u;
+  document.getElementById('btn-mmol').className = 'unit-pill ' + (u==='mmol' ? 'unit-on' : 'unit-off');
+  document.getElementById('btn-mgdl').className = 'unit-pill ' + (u==='mgdl' ? 'unit-on' : 'unit-off');
+  const cfg = UC[u];
+  const unitStr = u === 'mmol' ? 'mmol/L' : 'mg/dL';
+  document.getElementById('lbl-isf').textContent       = `ISF / Correction Factor (${unitStr} per unit)`;
+  document.getElementById('hint-isf').textContent      = `How much 1 unit lowers blood glucose (${unitStr} per unit)`;
+  document.getElementById('inp-isf').placeholder       = cfg.isfPh;
+  document.getElementById('lbl-target').textContent    = `Current Target Glucose (${unitStr})`;
+  document.getElementById('inp-target').placeholder    = cfg.targetPh;
+  document.getElementById('tir-range-lbl').textContent = cfg.tirLabel;
+  document.getElementById('site-threshold').textContent= cfg.siteThreshold;
+  document.getElementById('lbl-calc-bg').textContent   = `Current Blood Glucose (${unitStr})`;
+  document.getElementById('calc-bg').placeholder       = cfg.bgPh;
+  document.getElementById('lbl-calc-target').textContent = `Target Glucose (${unitStr})`;
+  document.getElementById('calc-target').placeholder   = cfg.targetPh;
+  document.getElementById('lbl-icr-pre').textContent   = `Pre-meal glucose (${unitStr})`;
+  document.getElementById('lbl-icr-post').textContent  = `4-hour post-meal glucose (${unitStr})`;
+  document.getElementById('icr-premeal').placeholder   = cfg.bgPh;
+  document.getElementById('icr-postmeal').placeholder  = cfg.bgPh;
+  if (doSave) save();
+  updateCalcTab();
+}
+
+// ─────────────────────────────────────────────────────────
+// PUMP SELECTION
+// ─────────────────────────────────────────────────────────
+
+function selectPump(pump, doSave=true) {
+  appPump = pump;
+  Object.keys(PUMP_NAMES).forEach(p => {
+    document.getElementById('pump-'+p).classList.toggle('sel', p === pump);
+  });
+  // AIT visibility
+  document.getElementById('row-ait').classList.toggle('hidden', !PUMP_HAS_AIT.includes(pump));
+  // iLet has no ICR/ISF
+  const isAuto = PUMP_FULLY_AUTO.includes(pump);
+  document.getElementById('row-icr').style.display    = isAuto ? 'none' : '';
+  document.getElementById('row-isf').style.display    = isAuto ? 'none' : '';
+  document.getElementById('row-target').style.display = isAuto ? 'none' : '';
+  if (doSave) save();
+  updateDeviceReference();
+}
+
+// ─────────────────────────────────────────────────────────
+// TIR VISUAL BAR
+// ─────────────────────────────────────────────────────────
+
+function drawTirBar() {
+  const tir = parseFloat(v('inp-tir'));
+  const tbr = parseFloat(v('inp-tbr'));
+  const tar = parseFloat(v('inp-tar'));
+  const vis = document.getElementById('tir-visual');
+  if (isNaN(tir) && isNaN(tbr) && isNaN(tar)) { vis.style.display='none'; return; }
+  vis.style.display = '';
+  const t  = isNaN(tir) ? 0 : tir;
+  const b  = isNaN(tbr) ? 0 : tbr;
+  const a  = isNaN(tar) ? 0 : tar;
+  const tot = Math.max(1, t + b + a);
+  document.getElementById('tir-bar').innerHTML = `
+    <div style="width:${b/tot*100}%;background:#ef4444;"></div>
+    <div style="width:${t/tot*100}%;background:#22c55e;"></div>
+    <div style="width:${a/tot*100}%;background:#f59e0b;"></div>
+  `;
+  document.getElementById('tir-bar-tbr').textContent = isNaN(tbr) ? '' : `TBR ${tbr}%`;
+  document.getElementById('tir-bar-tir').textContent = isNaN(tir) ? '' : `TIR ${tir}%`;
+  document.getElementById('tir-bar-tar').textContent = isNaN(tar) ? '' : `TAR ${tar}%`;
+  // Status message
+  const st = document.getElementById('tir-status');
+  const issues = [];
+  if (!isNaN(tbr) && tbr >= 4) issues.push({ col:'#dc2626', bg:'#fef2f2', msg:`⚠️ TBR ${tbr}% ≥ 4% — Hypoglycaemia priority` });
+  if (!isNaN(tir) && tir < 70) issues.push({ col:'#d97706', bg:'#fffbeb', msg:`📊 TIR ${tir}% is below the 70% target` });
+  if (!isNaN(tir) && tir >= 70 && (isNaN(tbr) || tbr < 4)) issues.push({ col:'#059669', bg:'#ecfdf5', msg:`✅ TIR ${tir}% meeting target (>70%)` });
+  if (issues.length > 0) {
+    const i = issues[0];
+    st.style.cssText = `color:${i.col};background:${i.bg};margin-top:8px;font-size:12px;font-weight:600;padding:8px 12px;border-radius:8px;`;
+    st.textContent = i.msg;
+  } else { st.textContent = ''; }
+}
+
+// ─────────────────────────────────────────────────────────
+// CALCULATOR TAB
+// ─────────────────────────────────────────────────────────
+
+function updateCalcTab() {
+  const tdd = parseFloat(v('inp-tdd'));
+  const box = document.getElementById('tdd-estimates-box');
+  if (isNaN(tdd) || tdd < 5) {
+    box.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:16px 0;">Enter TDD in Setup to generate estimates</div>';
+    return;
+  }
+  const cfg = UC[appUnits];
+  const icrEst  = Math.round(500 / tdd);
+  const isfEst  = appUnits === 'mmol' ? (100/tdd).toFixed(1) : Math.round(1800/tdd);
+  const unit    = appUnits === 'mmol' ? 'mmol/L' : 'mg/dL';
+  const basalLo = (tdd * 0.40).toFixed(1);
+  const basalHi = (tdd * 0.50).toFixed(1);
+  const currentICR = parseFloat(v('inp-icr'));
+  const currentISF = parseFloat(v('inp-isf'));
+
+  // Compare current vs estimate
+  let icrNote = '', isfNote = '';
+  if (!isNaN(currentICR)) {
+    const diff = currentICR - icrEst;
+    if (Math.abs(diff) <= 2) icrNote = `<span style="color:#059669;"> ✓ Current ${currentICR}g is close to estimate</span>`;
+    else if (diff > 2)       icrNote = `<span style="color:#d97706;"> ⚠️ Current ${currentICR}g may be too weak (ICR too high)</span>`;
+    else                     icrNote = `<span style="color:#d97706;"> ⚠️ Current ${currentICR}g may be too strong (ICR too low)</span>`;
+  }
+  if (!isNaN(currentISF)) {
+    const isfEstN = parseFloat(isfEst);
+    const tol = appUnits === 'mmol' ? 0.5 : 8;
+    const diff = currentISF - isfEstN;
+    if (Math.abs(diff) <= tol) isfNote = `<span style="color:#059669;"> ✓ Current ${currentISF} is close to estimate</span>`;
+    else if (diff > tol)       isfNote = `<span style="color:#d97706;"> ⚠️ Current ${currentISF} may be too high (too sensitive)</span>`;
+    else                       isfNote = `<span style="color:#d97706;"> ⚠️ Current ${currentISF} may be too low (too insensitive)</span>`;
+  }
+
+  box.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="background:#eff6ff;border-radius:10px;padding:12px 14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#0369a1;margin-bottom:4px;">500 Rule — ICR Estimate</div>
+        <div class="mono" style="font-size:22px;font-weight:700;color:#1e293b;">1 : ${icrEst} g</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">500 ÷ TDD(${tdd}) = ${icrEst} g/unit${icrNote}</div>
+      </div>
+      <div style="background:#faf5ff;border-radius:10px;padding:12px 14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#7c3aed;margin-bottom:4px;">${appUnits==='mmol'?'100':'1800'} Rule — ISF Estimate</div>
+        <div class="mono" style="font-size:22px;font-weight:700;color:#1e293b;">${isfEst} ${unit}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">${appUnits==='mmol'?'100':'1800'} ÷ TDD(${tdd}) = ${isfEst} ${unit}/unit${isfNote}</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#059669;margin-bottom:4px;">Expected 24-hr Basal (40–50% TDD)</div>
+        <div class="mono" style="font-size:22px;font-weight:700;color:#1e293b;">${basalLo} – ${basalHi} units</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">40–50% of TDD ${tdd}u = ${basalLo}–${basalHi} units/day total basal</div>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;background:#f8fafc;border-radius:8px;padding:8px 10px;">
+        ⚠️ These are mathematical starting estimates. Clinical pattern analysis must confirm final settings. Adjust in small increments (1–2 g for ICR; 0.3–5 units for ISF).
+      </div>
+    </div>
+  `;
+}
+
+function calcBolus() {
+  const bg     = parseFloat(v('calc-bg'));
+  const carbs  = parseFloat(v('calc-carbs'));
+  const target = parseFloat(v('calc-target'));
+  const iob    = parseFloat(v('calc-iob')) || 0;
+  const icr    = parseFloat(v('inp-icr'));
+  const isf    = parseFloat(v('inp-isf'));
+  const res    = document.getElementById('bolus-result');
+  if (isNaN(bg) && isNaN(carbs)) { res.style.display='none'; return; }
+
+  let rows = []; let total = 0;
+
+  if (!isNaN(carbs) && carbs > 0) {
+    if (!isNaN(icr) && icr > 0) {
+      const d = carbs / icr;
+      total += d;
+      rows.push(`<div style="display:flex;justify-content:space-between;"><span>Carb bolus (${carbs}g ÷ ${icr})</span><span class="mono" style="font-weight:700;">${d.toFixed(2)}u</span></div>`);
+    } else {
+      rows.push(`<div style="color:#d97706;font-size:12px;">Enter ICR in Setup for carb bolus calculation</div>`);
+    }
+  }
+
+  if (!isNaN(bg) && !isNaN(target) && !isNaN(isf) && isf > 0) {
+    const corr = (bg - target) / isf;
+    if (corr > 0.1) {
+      total += corr;
+      rows.push(`<div style="display:flex;justify-content:space-between;"><span>Correction (${bg}→${target} ÷ ${isf})</span><span class="mono" style="font-weight:700;">+${corr.toFixed(2)}u</span></div>`);
+    } else if (corr < -0.1) {
+      rows.push(`<div style="display:flex;justify-content:space-between;color:#059669;"><span>BG below target — no correction</span><span class="mono" style="font-weight:700;">0u</span></div>`);
+    }
+  }
+
+  if (iob > 0) {
+    total -= iob;
+    rows.push(`<div style="display:flex;justify-content:space-between;color:#dc2626;"><span>Minus IOB</span><span class="mono" style="font-weight:700;">−${iob.toFixed(2)}u</span></div>`);
+  }
+
+  const final = Math.max(0, total);
+  if (rows.length > 0 && (total !== 0 || iob > 0)) {
+    rows.push(`<hr style="border:none;border-top:1.5px solid #bae6fd;margin:6px 0;">`);
+    rows.push(`<div style="display:flex;justify-content:space-between;font-size:16px;"><span style="font-weight:700;">Suggested bolus</span><span class="mono" style="font-weight:800;color:#0369a1;">${final.toFixed(2)} units</span></div>`);
+    if (total < 0) rows.push(`<div style="font-size:11px;color:#d97706;margin-top:4px;">Calculated value was negative — recommend 0 units. Verify glucose trend.</div>`);
+  }
+
+  if (rows.length === 0) { res.style.display='none'; return; }
+  res.style.display = '';
+  res.innerHTML = `<div style="font-size:13px;display:flex;flex-direction:column;gap:4px;">${rows.join('')}</div>`;
+}
+
+function checkBasal() {
+  const total = parseFloat(v('calc-total-basal'));
+  const tdd   = parseFloat(v('inp-tdd'));
+  const res   = document.getElementById('basal-result');
+  if (isNaN(total)) { res.style.display='none'; return; }
+  res.style.display = '';
+  let html = `<div style="font-size:13px;display:flex;flex-direction:column;gap:4px;">`;
+  html += `<div style="display:flex;justify-content:space-between;"><span>Total basal entered:</span><span class="mono" style="font-weight:700;">${total}u</span></div>`;
+  if (!isNaN(tdd) && tdd > 0) {
+    const pct = (total / tdd * 100).toFixed(0);
+    let col='#059669', msg='✓ Within 40–50% target range';
+    if (pct < 30)      { col='#dc2626'; msg='⚠️ Very low — significantly under-basalled'; }
+    else if (pct < 40) { col='#d97706'; msg='⚠️ Slightly below 40–50% target'; }
+    else if (pct > 60) { col='#dc2626'; msg='⚠️ High — consider reviewing basal rates'; }
+    else if (pct > 50) { col='#d97706'; msg='⚠️ Slightly above 40–50% target'; }
+    html += `<div style="display:flex;justify-content:space-between;"><span>% of TDD (${tdd}u):</span><span class="mono" style="font-weight:700;color:${col};">${pct}%</span></div>`;
+    html += `<div style="color:${col};font-weight:600;">${msg}</div>`;
+    html += `<div style="font-size:11px;color:#64748b;">Target range: ${(tdd*.4).toFixed(1)} – ${(tdd*.5).toFixed(1)} units/day</div>`;
+  } else {
+    html += `<div style="font-size:11px;color:#d97706;">Enter TDD in Setup to assess percentage</div>`;
+  }
+  html += '</div>';
+  res.innerHTML = html;
+}
+
+function checkICR() {
+  const pre  = parseFloat(v('icr-premeal'));
+  const post = parseFloat(v('icr-postmeal'));
+  const res  = document.getElementById('icr-result');
+  if (isNaN(pre) || isNaN(post)) { res.style.display='none'; return; }
+  res.style.display = '';
+  const diff  = post - pre;
+  const thresh = UC[appUnits].icr_threshold;
+  const unit   = appUnits === 'mmol' ? 'mmol/L' : 'mg/dL';
+  const curICR = parseFloat(v('inp-icr'));
+  let msg = '', col = '#059669', bg = '#ecfdf5';
+
+  if (Math.abs(diff) <= thresh * 0.5) {
+    msg = '✓ Glucose returned to near pre-meal level — ICR appears appropriate';
+  } else if (diff > thresh) {
+    col = '#d97706'; bg = '#fffbeb';
+    const suggest = !isNaN(curICR) ? ` (consider 1:${Math.max(1,curICR-2)} or 1:${Math.max(1,curICR-1)})` : '';
+    msg = `⚠️ Post-meal glucose elevated by ${diff.toFixed(1)} ${unit} — ICR may be too weak. Consider strengthening${suggest}. Adjust in 1–2g increments.`;
+  } else if (diff < -thresh) {
+    col = '#dc2626'; bg = '#fef2f2';
+    const suggest = !isNaN(curICR) ? ` (consider 1:${curICR+2} or 1:${curICR+1})` : '';
+    msg = `⚠️ Post-meal glucose dropped by ${Math.abs(diff).toFixed(1)} ${unit} — ICR may be too strong. Consider weakening${suggest}. Adjust in 1–2g increments.`;
+  } else {
+    msg = `✓ Glucose change within acceptable range (${diff>0?'+':''}${diff.toFixed(1)} ${unit})`;
+  }
+  res.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;">
+      <div style="display:flex;justify-content:space-between;"><span>Change at 4 hrs:</span><span class="mono" style="font-weight:700;">${diff>0?'+':''}${diff.toFixed(1)} ${unit}</span></div>
+      <div style="color:${col};font-weight:600;background:${bg};padding:6px 10px;border-radius:6px;">${msg}</div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────
+// DEVICE REFERENCE
+// ─────────────────────────────────────────────────────────
+
+function updateDeviceReference() {
+  const ref = DEVICE_REFS[appPump];
+  if (!ref) return;
+  document.getElementById('dev-ref-name').textContent = PUMP_NAMES[appPump];
+  const items = [
+    { col:'#0369a1', key:'Algorithm',              val: ref.algorithm },
+    { col:'#059669', key:'Target Glucose Options',  val: ref.targets },
+    { col:'#7c3aed', key:'Optimal Starting Settings',val: ref.optimal },
+    { col:'#0891b2', key:'Bolus Automation',         val: ref.bolus_auto },
+    { col:'#d97706', key:'Active Insulin Time',      val: ref.ait },
+    { col:'#0369a1', key:'Exercise / Activity Mode', val: ref.exercise },
+    { col:'#475569', key:'Adjustable in AID Mode',   val: ref.editable },
+    { col:'#dc2626', key:'CGM Loss Behaviour',       val: ref.revert },
+    { col:'#475569', key:'Compatible CGM',           val: ref.cgm },
+    { col:'#1e293b', key:'Key Clinical Notes',       val: ref.special },
+  ];
+  document.getElementById('device-ref-content').innerHTML = items.map(i => `
+    <div class="ref-item">
+      <div class="ref-key" style="color:${i.col};">${i.key}</div>
+      <div class="ref-val">${i.val}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// RECOMMENDATION ENGINE
+// (Based on PANTHER Program PDFs + DSN Forum UK HCL Crib Sheet v5)
+// ─────────────────────────────────────────────────────────
+
+function generateRecommendations() {
+  const container = document.getElementById('recommendations-list');
+  const recs = []; // {level:'urgent|warn|info|good', title, body}
+
+  // — Read all values —
+  const tdd      = parseFloat(v('inp-tdd'));
+  const icr      = parseFloat(v('inp-icr'));
+  const isf      = parseFloat(v('inp-isf'));
+  const tir      = parseFloat(v('inp-tir'));
+  const tbr      = parseFloat(v('inp-tbr'));
+  const tar      = parseFloat(v('inp-tar'));
+  const automode = parseFloat(v('inp-automode'));
+  const ait      = v('inp-ait');
+
+  const hyperFasting = c('hyper-fasting'), hyperPB = c('hyper-postbreakfast'),
+        hyperPL = c('hyper-postlunch'), hyperPD = c('hyper-postdinner'),
+        hyperOvernight = c('hyper-overnight'), hyperEx = c('hyper-exercise');
+  const hypoFasting = c('hypo-fasting'), hypoPB = c('hypo-postbreakfast'),
+        hypoPL = c('hypo-postlunch'), hypoPD = c('hypo-postdinner'),
+        hypoOvernight = c('hypo-overnight'), hypoEx = c('hypo-exercise'),
+        hypoRebound = c('hypo-rebound');
+  const fastingTrend = sv('sel-fasting-trend');
+  const postMealPtn  = sv('sel-postmeal');
+  const lateBolus = c('chk-late-bolus'), missedBolus = c('chk-missed-bolus'),
+        bolusOverride = c('chk-bolus-override'), fakeCarbs = c('chk-fake-carbs'),
+        exerciseIssues = c('chk-exercise-issues'), siteIssues = c('chk-site-issues');
+
+  const anyHyper      = hyperFasting || hyperPB || hyperPL || hyperPD || hyperOvernight || hyperEx;
+  const anyHypo       = hypoFasting || hypoPB || hypoPL || hypoPD || hypoOvernight || hypoEx;
+  const postMealHyper = hyperPB || hyperPL || hyperPD;
+  const postMealHypo  = hypoPB || hypoPL || hypoPD;
+  const pump          = appPump;
+
+  // ── PRIORITY SAFETY ─────────────────────────────────────
+
+  if (!isNaN(tbr) && tbr >= 4) {
+    recs.push({ level:'urgent', title:'🚨 TBR ≥4% — Hypoglycaemia Priority',
+      body:`TBR of ${tbr}% requires urgent attention. Address hypoglycaemia BEFORE attempting to reduce hyperglycaemia. Do not increase insulin doses while TBR ≥4%. Identify timing and cause of lows using the Patterns tab.` });
+  }
+
+  if (siteIssues) {
+    recs.push({ level:'urgent', title:'🔧 Possible Infusion Site / Cannula Issue',
+      body:`Unexplained persistent hyperglycaemia unresponsive to automated corrections suggests site failure. Action: change infusion set immediately if glucose >${appUnits==='mmol'?'15 mmol/L':'270 mg/dL'} for >2 hours. Check for kinking, lipohypertrophy, or occlusion. Test ketones.` });
+  }
+
+  if (fakeCarbs) {
+    recs.push({ level:'urgent', title:'🚫 Fake Carb Entries Suspected',
+      body:`Fictitious carbohydrate entries significantly increase hypoglycaemia risk and disrupt algorithm learning (especially iLet). The AID system will eventually self-correct hyperglycaemia. Educate patient: fake carbs cause unpredictable glucose swings and are unsafe.` });
+  }
+
+  // ── AUTOMODE ────────────────────────────────────────────
+
+  if (!isNaN(automode) && automode < 80) {
+    recs.push({ level:'warn', title:`⚙️ Automode ${automode}% — Below 80% Target`,
+      body:`Spending >20% of time outside automated mode substantially reduces AID benefit. Investigate: 780G — are BG prompts being responded to? Omnipod 5 — Automated Delivery Restriction alarms? All systems — CGM connectivity issues, frequent manual suspensions, or deliberate deactivation? Target >80% for meaningful clinical benefit.` });
+  }
+
+  // ── TIR SUMMARY ─────────────────────────────────────────
+
+  if (!isNaN(tir) && tir >= 70 && (isNaN(tbr) || tbr < 4)) {
+    recs.push({ level:'good', title:`✅ TIR ${tir}% — Meeting International Target`,
+      body:`Time in range meets the >70% international consensus target. TBR is within acceptable range. Continue current approach. Reassess at next clinic visit and fine-tune seasonal or lifestyle-related variability.` });
+  } else if (!isNaN(tir) && tir < 70) {
+    recs.push({ level:'warn', title:`📊 TIR ${tir}% — Below the 70% Target`,
+      body:`Systematically review patterns in the order: (1) Address hypoglycaemia first (if TBR ≥4%), (2) Identify time-of-day hyperglycaemia patterns, (3) Review behavioural factors (bolus timing, carb counting accuracy, missed boluses), (4) Then consider setting adjustments.` });
+  }
+
+  // ── BEHAVIOUR FLAGS ──────────────────────────────────────
+
+  if (lateBolus) {
+    recs.push({ level:'warn', title:'⏰ Late Bolusing Pattern',
+      body:`Pre-bolus 10–15 min before meals for optimal post-meal control. Late bolusing causes an initial glucose spike (system hasn't begun correcting) followed by potential delayed hypoglycaemia. If meal bolus given <1 hr after eating: only enter half the carbs — system will have already started correcting. If >1 hr after: correct through bolus calculator.` });
+  }
+
+  if (missedBolus) {
+    recs.push({ level:'warn', title:'❌ Missed Meal Boluses',
+      body:`All current AID systems (except iLet) rely on user-initiated meal boluses. Missed boluses result in post-meal hyperglycaemia that the algorithm cannot fully compensate for. Review bolus compliance patterns in daily reports. Consider: alerts, phone reminders, or Mobi quick bolus button.` });
+  }
+
+  if (bolusOverride) {
+    recs.push({ level:'warn', title:'⚖️ Bolus Calculator Being Overridden',
+      body:`The AID bolus calculator accounts for IOB from automated insulin already delivered. Overriding frequently may cause hypoglycaemia if extra automated delivery is already active. The suggested dose is usually the safer choice. Discuss with patient and establish agreed exceptions (high-fat meals, illness, etc.).` });
+  }
+
+  // ── PUMP-SPECIFIC HYPERGLYCAEMIA ─────────────────────────
+
+  if (anyHyper) {
+
+    // — MiniMed 780G —
+    if (pump === '780g') {
+      if (hyperFasting || hyperOvernight || fastingTrend === 'rising') {
+        recs.push({ level:'info', title:'📈 780G — Overnight/Fasting Hyperglycaemia',
+          body:`1. Ensure SmartGuard is active overnight — are BG prompts being missed? Set target to 100 mg/dL (5.5 mmol/L) and AIT to 2 hours for most aggressive overnight delivery. 2. Review evening/bedtime bolus: was dinner bolused adequately? 3. Consider impact of bedtime snack (bolus for it if >15g carbs). 4. Check cannula change frequency.` });
+      }
+      if (postMealHyper || postMealPtn === 'high') {
+        recs.push({ level:'info', title:'📈 780G — Post-Meal Hyperglycaemia',
+          body:`Primary action: strengthen ICR by reducing grams-per-unit in 1–2g increments. Ensure pre-bolus 10–15 min before meals — the 780G auto corrections (every 5 min, if >6.7 mmol/L) are a supplement to, not a replacement for, accurate meal bolusing. Confirm accurate carb counting. Reduce AIT if currently set to >2 hrs (more aggressive delivery).` });
+      }
+      if (ait && parseInt(ait) > 2) {
+        recs.push({ level:'info', title:'⚙️ 780G — AIT Optimisation Opportunity',
+          body:`AIT is currently set to ${ait} hours. The optimal setting for most patients is 2 hours — this gives the most aggressive SmartGuard performance and is primarily relevant to auto correction bolus doses. Reduce AIT to 2 hours if TBR is <4% and hypoglycaemia risk is acceptable.` });
+      }
+    }
+
+    // — Omnipod 5 —
+    if (pump === 'omnipod5') {
+      if (hyperOvernight || hyperFasting) {
+        recs.push({ level:'info', title:'📈 Omnipod 5 — Overnight/Fasting Hyperglycaemia',
+          body:`1. Reduce target glucose to a lower available setting (minimum 110 mg/dL / 6.1 mmol/L). 2. Note: Omnipod 5 has no auto correction boluses — overnight control relies on increased Adaptive Basal. If basal delivery is already near maximum (400% adaptive), ICR/ISF review is needed. 3. Check bolus adequacy for evening meal.` });
+      }
+      if (postMealHyper || postMealPtn === 'high') {
+        recs.push({ level:'info', title:'📈 Omnipod 5 — Post-Meal Hyperglycaemia',
+          body:`Strengthen ICR (reduce grams-per-unit by 1–2g). Tap "Use Sensor" when bolusing to incorporate CGM trend arrow into the recommendation. Omnipod 5 has no auto correction boluses — accurate meal bolusing is essential. If patient is overriding bolus calculator, this may be the primary cause.` });
+      }
+      if (postMealPtn === 'high' || anyHyper) {
+        recs.push({ level:'info', title:'📈 Omnipod 5 — ISF Review',
+          body:`Consider strengthening ISF (reduce the value in mg/dL per unit) if baseline glucose remains elevated despite adequate basal delivery. ISF is used for any manual correction boluses and affects algorithm correction calculations.` });
+      }
+    }
+
+    // — t:slim —
+    if (pump === 'tslim') {
+      if (hyperOvernight || hyperFasting || fastingTrend === 'rising') {
+        recs.push({ level:'info', title:'📈 t:slim — Overnight/Fasting Hyperglycaemia',
+          body:`1. Activate Sleep Activity overnight (narrows target to 112.5–120 mg/dL, increases basal delivery). Programme a sleep schedule for automatic daily activation. 2. If already using Sleep Activity: consider strengthening ISF or increasing basal rate(s) in the 1–2 hours preceding the hyperglycaemia. 3. Review dinner bolus adequacy.` });
+      }
+      if (postMealHyper || postMealPtn === 'high') {
+        recs.push({ level:'info', title:'📈 t:slim — Post-Meal Hyperglycaemia',
+          body:`t:slim auto correction boluses activate only when glucose is predicted to exceed 10 mmol/L (180 mg/dL) in 30 minutes (max once/hr). Meal bolus accuracy is critical. Actions: strengthen ICR and/or ISF. Ensure Sleep Activity is not active during daytime (it disables auto corrections). Use multiple profiles for variable insulin needs.` });
+      }
+    }
+
+    // — twiist —
+    if (pump === 'twiist') {
+      recs.push({ level:'info', title:'📈 twiist — Hyperglycaemia Management',
+        body:`1. Lower the Correction Range to a more aggressive setting (e.g. 90–110 mg/dL width of 20 mg/dL). 2. Use Pre-Meal Preset (67–130 mg/dL, up to 1 hr before meals) to increase basal pre-meal and reduce post-prandial peaks. 3. Check Maximum Basal Rate is set at 3–4× highest programmed basal rate to allow adequate automation. 4. Indicate carb absorption time (🍭🌮🍕 emoji) for better post-meal coverage.` });
+    }
+
+    // — iLet —
+    if (pump === 'ilet') {
+      recs.push({ level:'info', title:'📈 iLet — Hyperglycaemia Management',
+        body:`1. Primary lever: switch CGM target from "Usual" (6.7 mmol/L) to "Lower" (6.1 mmol/L) if persistent hyperglycaemia. Allow 5–7 days for adaptation before re-assessing. 2. Do NOT use meal announcements to correct high glucose — this disrupts the algorithm's learning and increases hypoglycaemia risk. 3. Ensure meal announcements are accurate (meal type + size).` });
+    }
+
+    // — CamAPS —
+    if (pump === 'camaps') {
+      recs.push({ level:'info', title:'📈 CamAPS FX — Hyperglycaemia Management',
+        body:`1. Reduce glucose target if currently elevated (primary action). 2. Strengthen ICR for post-meal hyperglycaemia. 3. Allow the algorithm time to self-adjust before using Boost. Boost (increases basal by 35%) should only be used for known transient causes: illness, reduced activity, stress, menstrual cycle. 4. Update patient weight if not done in last 6 months.` });
+    }
+  }
+
+  // ── PUMP-SPECIFIC HYPOGLYCAEMIA ──────────────────────────
+
+  if (anyHypo) {
+
+    recs.push({ level:'urgent', title:'📉 Hypoglycaemia — Immediate Treatment Reminder',
+      body:`With AID: treat mild hypoglycaemia with 5–10 g fast-acting carbs (NOT the traditional 15 g rule). The algorithm will already have reduced or suspended insulin. Overtreating causes rebound hyperglycaemia requiring further corrections — this creates a glucose cycling pattern. Wait 10–15 min before retreating.` });
+
+    if (hypoRebound) {
+      recs.push({ level:'warn', title:'🔄 Rebound Hyperglycaemia After Hypo',
+        body:`Patient is overtreating hypoglycaemia. Reinforce 5–10 g rule. Log hypo treatment amounts in the AGP reports to identify overtreatment. CamAPS FX users: log hypo treatments in the app's "add meal" section to help the algorithm track active carbohydrates and avoid overcorrection.` });
+    }
+
+    // — 780G —
+    if (pump === '780g') {
+      recs.push({ level:'info', title:'📉 780G — Hypoglycaemia Management',
+        body:`Options (start with least invasive): 1. Increase SmartGuard target (110 or 120 mg/dL). 2. Use Temp Target 1–2 hrs before known hypo triggers (raises target to 150 mg/dL, disables auto corrections). 3. If post-meal hypos: weaken ICR by 1–2g increments. 4. If exercise-related: use Temp Target 1–2 hrs before, reduce meal bolus by 30% for meals within 90 min of exercise, and increase AIT. 5. Confirm no fake carb boluses.` });
+    }
+
+    // — Omnipod 5 —
+    if (pump === 'omnipod5') {
+      recs.push({ level:'info', title:'📉 Omnipod 5 — Hypoglycaemia Management',
+        body:`Options: 1. Increase Target Glucose to next available setting. 2. Use Activity Feature 1–2 hrs before exercise or known hypo triggers. 3. If post-meal hypos: weaken ICR. 4. Review ISF — too aggressive will cause overcorrection. 5. Note: insulin suspension can occur when glucose is trending down even if above target — this is expected and short-duration (5–15 min) behaviour.` });
+    }
+
+    // — t:slim —
+    if (pump === 'tslim') {
+      recs.push({ level:'info', title:'📉 t:slim — Hypoglycaemia Management',
+        body:`Options: 1. If overnight hypos during Sleep Activity: consider disabling Sleep Activity or using Exercise Activity instead (wider target, but auto corrections still possible). 2. Reduce relevant basal rates by 10–20% in the 1–2 hours prior to the hypo pattern. 3. If post-meal hypos: weaken ICR. 4. Consider weakening ISF. 5. Use Exercise Activity 1–2 hrs before exercise. Use additional profiles for activities with different insulin needs.` });
+    }
+
+    // — twiist —
+    if (pump === 'twiist') {
+      recs.push({ level:'info', title:'📉 twiist — Hypoglycaemia Management',
+        body:`Options: 1. Widen/raise Correction Range (less aggressive targeting). 2. Use Workout Preset 1–2 hrs before exercise (higher correction range 87–250 mg/dL). 3. If post-meal hypos: weaken ICR. 4. Review glucose safety limit (can suspend delivery if glucose predicted to drop below 67–110 mg/dL in 3 hrs). 5. Check maximum basal rate is not excessively high.` });
+    }
+
+    // — iLet —
+    if (pump === 'ilet') {
+      recs.push({ level:'info', title:'📉 iLet — Hypoglycaemia Management',
+        body:`Options: 1. Switch CGM target to "Higher" (7.2 mmol/L / 130 mg/dL). Allow 5–7 days adaptation. 2. For exercise: avoid large pre-exercise snacks. If large snack needed, pause iLet before eating (max 1 hr pause). 3. Ensure patient carries a BG meter at all times for BG-run mode if CGM fails. 4. First-week protocol: space meals ≥4 hrs apart to aid algorithm learning.` });
+    }
+
+    // — CamAPS —
+    if (pump === 'camaps') {
+      recs.push({ level:'info', title:'📉 CamAPS FX — Hypoglycaemia Management',
+        body:`Options: 1. Increase glucose target. 2. Review ICR if post-meal hypos. 3. Use Ease Off for known hypo-causing events (raises target by 2.5 mmol/L). Critical: activate Ease Off BEFORE the hypo — it is ineffective if pump has already suspended insulin. 4. Encourage patient to add hypo treatments in the "add meal" section to avoid overcorrection. 5. Update weight if overdue.` });
+    }
+  }
+
+  // ── EXERCISE ─────────────────────────────────────────────
+
+  if (exerciseIssues || hypoEx || hyperEx) {
+    const exerciseTips = {
+      '780g':     `Temp Target (raises to 8.3 mmol/L, disables auto corrections): activate 1–2 hrs before, consider leaving on several hrs post-exercise. Reduce meal bolus by ~30% for meals within 90 min of exercise. Increase AIT for post-exercise period if delayed hypo concern. Avoid large carb snacks before exercise.`,
+      'omnipod5': `Activity Feature (target 8.3 mmol/L, ~50% dose reduction): activate 1–2 hrs before, leave on post-exercise if delayed hypo concern. Reduce meal bolus 1–3 hrs before activity. Pod and Dexcom should be in line-of-sight during exercise.`,
+      'tslim':    `Exercise Activity (target 140–160 mg/dL): activate 1–2 hrs before. Note auto corrections can still occur. Leave on post-exercise. Reduce meal boluses 1–3 hrs before. Multiple profiles can be used for high-intensity vs. low-intensity activity days.`,
+      'twiist':   `Workout Preset (correction range 87–250 mg/dL, reduces basal): activate 1–2 hrs before exercise. Adjust sleep correction range if delayed nocturnal hypo is a pattern. Reduce meal bolus 1–3 hrs before. Carb absorption time emoji useful for pre-exercise meal.`,
+      'ilet':     `Personalise per exercise type and duration. Avoid large pre-exercise snacks (triggers insulin spike). If large snack required, pause iLet before eating (max 1 hr at a time). Post-exercise: allow algorithm to adapt. Always carry BG meter for BG-run mode.`,
+      'camaps':   `Ease Off (raises target +2.5 mmol/L): activate BEFORE exercise — ineffective once pump has already suspended. For prolonged activity, raise app target glucose setting. Boost should be avoided around exercise. Update weight if activity level changes significantly.`,
+    };
+    recs.push({ level:'info', title:`🏃 Exercise Management — ${PUMP_NAMES[pump]}`,
+      body: exerciseTips[pump] || 'Activate your system\'s exercise/activity mode 1–2 hours before physical activity. Reduce meal boluses 1–3 hrs before exercise. Monitor for delayed post-exercise hypoglycaemia overnight.' });
+  }
+
+  // ── POSITIVE ─────────────────────────────────────────────
+
+  if (!anyHyper && !anyHypo && !isNaN(tir) && tir >= 70 && !isNaN(tbr) && tbr < 4 && !lateBolus && !missedBolus) {
+    recs.push({ level:'good', title:'🎉 No Significant Patterns Identified',
+      body:`No hyperglycaemia or hypoglycaemia patterns recorded. TIR and TBR are meeting targets. Continue current approach. Review at next clinic visit — ensure exercise, illness, and lifestyle settings are documented and patient is aware of all available system features.` });
+  }
+
+  // ── EMPTY STATE ──────────────────────────────────────────
+
+  if (recs.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:13px;padding:24px 0;">Complete the Setup and Patterns tabs to generate tailored recommendations.</div>`;
+    return;
+  }
+
+  // ── RENDER ───────────────────────────────────────────────
+  const levelClass = { urgent:'rec-urgent', warn:'rec-warn', info:'rec-info', good:'rec-good' };
+  container.innerHTML = recs.map(r => `
+    <div class="rec ${levelClass[r.level]}">
+      <div class="rec-title">${r.title}</div>
+      <div class="rec-body">${r.body}</div>
+    </div>
+  `).join('');
+
+  updateDeviceReference();
+}
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Pre-fill calc target from Setup target when calc tab opens
+  document.getElementById('tab-calculator').addEventListener('click', function() {
+    const t = v('inp-target');
+    if (t) document.getElementById('calc-target').value = t;
+  });
+  loadAndRestore();
+});
+</script>
+</body>
+</html>
