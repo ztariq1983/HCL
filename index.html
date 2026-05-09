@@ -133,6 +133,7 @@
   <button class="tab-btn"        id="tab-patterns"   onclick="showTab('patterns')">   <span class="text-lg">📊</span>Patterns</button>
   <button class="tab-btn"        id="tab-calculator" onclick="showTab('calculator')"> <span class="text-lg">🔢</span>Calc</button>
   <button class="tab-btn"        id="tab-advice"     onclick="showTab('advice')">     <span class="text-lg">💡</span>Advice</button>
+  <button class="tab-btn"        id="tab-index"      onclick="showTab('index')">      <span class="text-lg">🔤</span>Index</button>
 </div>
 
 <!-- ════════════════════════════════════════════════════════
@@ -443,6 +444,163 @@
 
   </div><!-- /pane-advice -->
 
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PANE 5 — ABBREVIATIONS INDEX
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div id="pane-index" style="display:none;">
+
+    <div class="card">
+      <div class="section-label">🔤 Abbreviations &amp; Glossary</div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:14px;">All abbreviations used in this tool, listed alphabetically.</p>
+
+      <div style="display:flex; flex-direction:column; gap:2px;">
+
+        <!-- A -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">A</div>
+
+        <div class="ref-item">
+          <div class="ref-key">AGP</div>
+          <div class="ref-val"><strong>Ambulatory Glucose Profile</strong> — A standardised visual report of CGM data showing glucose patterns over a set period (typically 14 days). Used to assess TIR, TBR, and TAR at a glance.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">AID</div>
+          <div class="ref-val"><strong>Automated Insulin Delivery</strong> — A system that automatically adjusts insulin delivery in response to CGM readings. Also called a closed-loop or artificial pancreas system.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">AIT</div>
+          <div class="ref-val"><strong>Active Insulin Time</strong> — The duration over which the system considers a bolus dose to still be active in the body. Also called Duration of Insulin Action (DIA) or Insulin Duration. Shorter AIT = more aggressive correction behaviour.</div>
+        </div>
+
+        <!-- B -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">B</div>
+
+        <div class="ref-item">
+          <div class="ref-key">BG</div>
+          <div class="ref-val"><strong>Blood Glucose</strong> — The concentration of glucose in the blood, measured in mmol/L. Used interchangeably with "blood sugar."</div>
+        </div>
+
+        <!-- C -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">C</div>
+
+        <div class="ref-item">
+          <div class="ref-key">CF</div>
+          <div class="ref-val"><strong>Correction Factor</strong> — See ISF. How much 1 unit of insulin lowers blood glucose (mmol/L per unit). Used to calculate correction boluses.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">CGM</div>
+          <div class="ref-val"><strong>Continuous Glucose Monitor</strong> — A wearable sensor that measures interstitial glucose every 1–5 minutes and transmits readings to a pump or app. The core input for all AID systems.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">CR</div>
+          <div class="ref-val"><strong>Carbohydrate Ratio</strong> — See ICR. The grams of carbohydrate covered by 1 unit of insulin.</div>
+        </div>
+
+        <!-- D -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">D</div>
+
+        <div class="ref-item">
+          <div class="ref-key">DIA</div>
+          <div class="ref-val"><strong>Duration of Insulin Action</strong> — See AIT. The period the system treats a bolus as still active. Typically 2–6 hours depending on the pump.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">DSN</div>
+          <div class="ref-val"><strong>Diabetes Specialist Nurse</strong> — A nurse with specialist training in diabetes management, including insulin pump therapy and AID systems.</div>
+        </div>
+
+        <!-- G -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">G</div>
+
+        <div class="ref-item">
+          <div class="ref-key">GMI</div>
+          <div class="ref-val"><strong>Glucose Management Indicator</strong> — An estimated HbA1c calculated from average CGM glucose over 14+ days. Provides a real-time surrogate for lab HbA1c.</div>
+        </div>
+
+        <!-- H -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">H</div>
+
+        <div class="ref-item">
+          <div class="ref-key">HbA1c</div>
+          <div class="ref-val"><strong>Glycated Haemoglobin</strong> — A lab test reflecting average blood glucose over the preceding 2–3 months. Expressed as a percentage or mmol/mol. Target is typically &lt;53 mmol/mol (&lt;7%) for most adults with type 1 diabetes.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">HCL</div>
+          <div class="ref-val"><strong>Hybrid Closed Loop</strong> — An AID system where the algorithm automates basal insulin but still requires user input for meal boluses (except iLet). "Hybrid" distinguishes it from a fully closed loop.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">HCP</div>
+          <div class="ref-val"><strong>Healthcare Professional</strong> — A clinician involved in the patient's diabetes care, such as a DSN, consultant diabetologist, or GP.</div>
+        </div>
+
+        <!-- I -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">I</div>
+
+        <div class="ref-item">
+          <div class="ref-key">ICR</div>
+          <div class="ref-val"><strong>Insulin:Carb Ratio</strong> — The grams of carbohydrate covered by 1 unit of bolus insulin. Expressed as "1:X" (e.g. 1:10 means 1 unit per 10 g carbs). A lower number = more insulin per gram = stronger ratio.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">IOB</div>
+          <div class="ref-val"><strong>Insulin on Board</strong> — The estimated amount of active insulin remaining in the body from previous bolus and/or automated doses. AID systems track IOB to avoid insulin stacking and overcorrection.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">ISF</div>
+          <div class="ref-val"><strong>Insulin Sensitivity Factor</strong> — How much 1 unit of insulin is expected to lower blood glucose (mmol/L per unit). Also called Correction Factor (CF). Used for correction bolus calculations.</div>
+        </div>
+
+        <!-- M -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">M</div>
+
+        <div class="ref-item">
+          <div class="ref-key">mmol/L</div>
+          <div class="ref-val"><strong>Millimoles per Litre</strong> — The unit used in the UK and most of Europe to express blood glucose concentration. Normal fasting range is approximately 3.9–5.5 mmol/L.</div>
+        </div>
+
+        <!-- P -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">P</div>
+
+        <div class="ref-item">
+          <div class="ref-key">PANTHER</div>
+          <div class="ref-val"><strong>Pump And Non-THErapy Research</strong> — A UK NHS programme providing structured education and clinical support for insulin pump and AID therapy. Source of device fact sheets used in this tool.</div>
+        </div>
+
+        <!-- T -->
+        <div style="font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#0369a1; margin-top:10px; margin-bottom:4px; padding-left:4px;">T</div>
+
+        <div class="ref-item">
+          <div class="ref-key">TAR</div>
+          <div class="ref-val"><strong>Time Above Range</strong> — The percentage of CGM readings above 10.0 mmol/L over a given period. International target: &lt;25%. High TAR indicates persistent hyperglycaemia.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">TBR</div>
+          <div class="ref-val"><strong>Time Below Range</strong> — The percentage of CGM readings below 3.9 mmol/L. International target: &lt;4%. TBR ≥4% is a clinical priority — address hypoglycaemia before targeting hyperglycaemia.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">TDD</div>
+          <div class="ref-val"><strong>Total Daily Dose</strong> — The total units of insulin delivered in 24 hours, including both basal and bolus insulin. Used to estimate ICR (500 ÷ TDD) and ISF (100 ÷ TDD in mmol/L). Typically split ~50% basal / 50% bolus.</div>
+        </div>
+
+        <div class="ref-item">
+          <div class="ref-key">TIR</div>
+          <div class="ref-val"><strong>Time in Range</strong> — The percentage of CGM readings between 3.9 and 10.0 mmol/L. International consensus target: &gt;70% for most adults with type 1 diabetes on AID therapy.</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /pane-index -->
+
 </div><!-- /main-content -->
 
 <!-- ════════════════════════════════════════════════════════
@@ -470,7 +628,7 @@
 // CONSTANTS
 // ─────────────────────────────────────────────────────────
 
-const TABS  = ['setup','patterns','calculator','advice'];
+const TABS  = ['setup','patterns','calculator','advice','index'];
 
 const PUMP_NAMES = {
   '780g':     'MiniMed 780G',
